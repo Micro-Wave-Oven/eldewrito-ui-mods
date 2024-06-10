@@ -1,0 +1,160 @@
+@font-face{font-family:"Conduit ITC";src:url(dew://lib/Conduit-ITC.woff);}
+body {
+    margin: 0;
+    font-family: "Conduit ITC", sans-serif;
+    overflow: hidden;
+}
+
+#chat {
+    position: absolute;
+    font-size: 19px;
+    line-height: 26px;
+    letter-spacing: 0.3px;
+    color: white;
+    overflow: hidden;
+    zoom: 75%;
+    height: 37.5%;
+}
+
+.inGame #chat{
+    bottom: 40%;
+    left: 5%;  
+    width: 27%;
+}
+
+.inLobby #chat{
+    bottom: 0%;
+    left: 32.5%; 
+    width: 35%;
+}
+
+#chatWindow {
+    position: absolute;
+    bottom: 26px;
+    width: 100%;
+    text-shadow: -1px -1px 1px #000, 1px -1px 1px #000, -1px 1px 1px #000, 1px 1px 1px #000;
+    letter-spacing: 0.3px;
+    word-wrap: break-word;
+    overflow-y: auto;
+    max-height: 65%;
+}
+
+.inGame #chatWindow{
+    background-color: transparent;    
+}
+
+.inLobby #chatWindow{
+    background-color: rgba(0,0,0,0.5);    
+    padding-top: 0;
+    padding-bottom: 2px;
+}
+
+#chatWindow p{
+    margin: 0;
+    padding-top: 2px;
+    /*padding-left: 2px;*/
+}
+
+#chatWindow > p:first-child {
+    padding-top: 0px;
+    /*padding-top: 3px;*/
+}
+
+#chatWindow > p:last-child {
+    padding-bottom: 2px;
+}
+
+#chatBox {
+    position: absolute;
+    bottom: 0;
+    border: 2px solid #A9D4FE;
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+    width: calc(100% - 8px);
+    display: none;
+    font-size: 15px;
+    height: 19px;
+    -webkit-backface-visibility: hidden;
+    padding: 2px;
+}
+
+.inLobby #chatBox{
+    margin-top: 0px;
+    margin-bottom: 1px;
+}
+
+#chatBox:focus{
+    outline: none;
+}
+
+::placeholder {
+    color: #7A859B;
+}
+
+.nameCard{
+    padding: 2px 5px; 
+    color: white; 
+    margin-right: 4px;
+    height: 14px;
+}
+
+.GLOBAL, .TEAM, a {
+    color: #A9D4FE;
+    text-decoration: none;
+}
+
+a:hover{
+    text-decoration: underline;
+}
+
+.TEAM{
+}
+
+.TEAM span::after{
+    content: " (TEAM)";
+}
+
+.SERVER{
+    color: #FFFF00;
+}
+
+.WHISPER{
+    color: #FF0000;
+}
+
+.WHISPER span::after{
+    content: " (TO YOU)";
+}
+
+.UNKNOWN{
+}
+
+.emote{
+    background-color: transparent !important;
+    font-style: italic;
+    color: white !important;
+}
+
+.mentions{
+    color: #18a0f0 !important;
+}
+
+.mention{
+    color: #33c11e;
+}
+
+.nameCard.emote{
+    margin-right: 0;
+}
+
+#chatWindow::-webkit-scrollbar {
+    width: 20px;
+}
+
+#chatWindow::-webkit-scrollbar-thumb {
+    background-color: #A9D4FE;
+}
+
+.hide-scrollbar::-webkit-scrollbar-thumb {
+    visibility : hidden !important;
+}

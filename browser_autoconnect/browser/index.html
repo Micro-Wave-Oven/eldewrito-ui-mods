@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Server Browser</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script type="text/javascript" src="dew://lib/jquery-2.2.1.min.js"></script>
+    <link rel="stylesheet" href="dew://lib/css/style-global-include.css"/>
+    <!-- Window Resize-->
+    <script src="window-resize-1080.js"></script>
+    <link rel="stylesheet" type="text/css" href="window-resize-1080.css" />
+
+</head>
+
+<body>
+    <div id="container">
+        <div class="page_content container">
+            <div class="server-list-header">
+                <p id="menuTitle">Server Browser</p>
+                <div></div>
+                <div id="serverSearch">
+                    <p id="population">test</p>
+                    <input id="server-list-filter" type="text" placeholder="search...">
+                    <button id="refresh">Refresh</button>
+                    <button id="cancel" disabled>Cancel Queue</button>
+					<p id="retries"></p>
+                </div>
+                <div class="playlist-tabs">
+                    <ul id="playlistTabs">
+                        <li><a href="#all">All</a></li>
+                        <li><a href="#social">Social</a></li>
+                        <li><a href="#ranked">Ranked</a></li>
+                        <li><a href="#customs">Customs</a></li>
+                        <li><a href="#private">Private</a></li>
+                        <li><a href="#forge">Forge</a></li>
+                    </ul>
+                    <div id="notice" class="notice_message"></div>
+                </div>
+            </div> 
+            <div class="page_footer gamepad-only">
+                <div class="footer_buttons">
+                    <button id="joinBtn" class="legend-button"><img class="button">Join Server</button>
+                    <button id="refreshBtn" class="legend-button"><img class="button"><a onclick="handleUserRefresh()" id="refreshLegendLink">Refresh List</a></button>
+                    <button id="quickjoinBtn" class="legend-button"><img class="button"><a onclick="quickJoin()">Quick Join</a></button>
+                    <button id="closeBtn" class="legend-button"><img class="button"><a onclick="handleUserCloseBrowser()">Close</a></button>
+					<button id="lanBtn" class="legend-button"><img class="button"><a onclick="handleUserOpenLanBrowser()">Lan Browser</a></button>
+                   
+
+                </div>
+                <div class="current_version" id="current_version"></div>
+            </div>
+            <div id="server-list-wrap"></div>
+
+        </div>
+    </div>
+    <script crossorigin src="dew://lib/dew.js"></script>
+    <script crossorigin src="ui.js"></script>
+    <script crossorigin src="list-widget.js"></script>
+	<script crossorigin src="react.production.min.js"></script>
+	<script crossorigin src="react-dom.production.min.js"></script>
+    <script crossorigin src="dew://lib/version.js"></script>
+    <script src="browser.js" type="text/javascript"></script>
+</body>
+
+</html>

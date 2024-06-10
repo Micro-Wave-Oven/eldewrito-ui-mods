@@ -1,0 +1,362 @@
+@font-face{font-family:"Conduit ITC";src:url(dew://lib/Conduit-ITC.woff);}
+body {
+    margin: 0;
+    font-family: "Conduit ITC", sans-serif;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+body:not([data-gamepad-enabled]) .gamepad-only {
+    display:none;
+}
+:root {
+    --side-margin: 120px;
+    --header-top-padding: 64px;
+    --header-top-height: 190px;
+    --sorting-height: 70px;
+}
+
+
+
+
+
+
+/*Header Area*/
+p#menuTitle {
+    font-size: 72px;
+    padding: 0;
+    margin: 0;
+    text-transform: uppercase;
+    color: #F0F0F0;
+    line-height: 140px;
+}
+.server-list-header {
+    background: radial-gradient(ellipse at center, rgba(6,9,12,0.7) 0%,rgba(6,9,12,0) 100%);
+    width: calc(100% - var(--side-margin) - var(--side-margin) );
+    position: absolute;
+    height: var(--header-top-height);
+    padding-left: var(--side-margin);
+    padding-right: var(--side-margin);
+}
+/*Search*/
+input#server-list-filter {
+    background-color: rgba(0, 0, 0, 0.34);
+    outline: none;
+    border: none;
+    font-size: 26px;
+    font-family: conduit itc;
+    padding: 12px;
+    top: 0;
+    vertical-align: top;
+    margin-right: 32px;
+    color: white;
+}
+input#server-list-filter:focus{
+    color: white;
+}
+div#serverSearch {
+    position: absolute;
+    right: var(--side-margin);
+    top: 50px;
+    display:flex;
+    flex-direction:row;
+    justify-content: center;
+    align-items: center;
+
+}
+button#refresh:hover {
+    opacity: 1;
+}
+button#refresh {
+    width: 48px;
+    height: 48px;
+    font-size: 0;
+    background: none;
+    border: none;
+    background-image: url(icon-refresh.svg);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    /* top: 0; */
+    vertical-align: top;
+    margin-top: 5px;
+    outline: none;
+    opacity: 0.8;
+}
+button#refresh.refreshing{
+    opacity: 1;
+    animation-name: refreshing;
+    animation-duration: 1000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+@keyframes refreshing {
+    from {
+        transform:rotate(0deg);
+        }
+    to {
+        transform:rotate(360deg);
+        }
+}
+
+#retries {
+    color: rgb(133, 141, 150);
+}
+
+button#cancel:hover:enabled{
+    opacity: 0.4;
+}
+button#cancel:enabled{
+    opacity: 0.6;
+}
+button#cancel:disabled{
+    opacity: 0.2;
+}
+button#cancel {
+    width: 48px;
+    height: 48px;
+    font-size: 0;
+    background: none;
+    border: none;
+    background-image: url(vetoed.png);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    /* top: 0; */
+    vertical-align: top;
+    margin-top: 5px;
+    outline: none;
+    opacity: 0.4;
+}
+
+
+
+.sort-asc:after{
+    content: '▲';
+}
+.sort-desc:after{
+    content: '▼';
+}
+
+.server-list th:nth-child(1), .server-list td:nth-child(1){ width: 40%;}
+.server-list th:nth-child(2), .server-list td:nth-child(2){ width: 15%;}
+.server-list th:nth-child(3), .server-list td:nth-child(3){ width: 5%;}
+.server-list th:nth-child(4), .server-list td:nth-child(4){ width: 10%;}
+.server-list th:nth-child(5), .server-list td:nth-child(5){ width: 10%;}
+.server-list th:nth-child(6), .server-list td:nth-child(6){ width: 10%;}
+.server-list th:nth-child(7), .server-list td:nth-child(7){ width: 5%;}
+.server-list th:nth-child(8), .server-list td:nth-child(8){ width: 5%;}
+
+.server-list td {
+    text-transform: capitalize;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.server-list th, .server-list td {
+    padding: 15px 10px;
+}
+
+
+/*Server browser*/
+#server-list-wrap {
+    position: absolute;
+    top: var(--header-top-height);
+    width: 100%;
+    height: calc(100% - var(--header-top-height));
+}
+
+/*Server browser container*/
+.server-list {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding-left: var(--side-margin);
+    padding-right: var(--side-margin);
+}
+/*Server Sorting*/
+.server-list thead{
+    background: linear-gradient(to right, rgba(6,9,12,0) 0%,rgba(6,9,12,0.08) 6%,rgba(6,9,12,0.49) 50%,rgba(6,9,12,0.5) 51%,rgba(6,9,12,0.08) 93%,rgba(6,9,12,0) 100%);
+    width: calc(100% - 8px);
+    display: block;
+    color: rgb(133, 141, 150);
+    text-transform: uppercase;
+}
+.server-list thead th:hover{
+    color: rgb(187, 200, 216);
+}
+
+/*Fix Table Spacing*/
+table.server-list thead tr, .server-list tbody tr {
+    display: flex;
+}
+table.server-list thead tr{
+    text-align: left;
+}
+/*Server List Scrolling*/
+.server-list tbody {
+    display: block;
+    height: calc( 100% - var(--sorting-height) );
+    overflow-y: scroll;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/*Server List Item Normal*/
+.server-list tbody tr {
+    font-size: 18px;
+    color: rgb(155, 170, 188);
+    width: 100%;
+}
+/*Server List Item padding*/
+.server-list tbody tr td {
+    padding: 10px 10px;
+}
+/*Server List Item Hovering*/
+.server-list tbody tr.selected {
+    background: linear-gradient(to right, rgba(127,90,53,0.8) 0%,rgba(126,89,53,0.5) 100%);
+	color: rgb(241, 241, 241);
+}
+
+#notice {
+    font-size: 24px;
+    font-weight: bold;
+    background: rgba(0,0,0, 0.7);
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+
+#notice:empty {
+    display: none;
+}
+
+#notice[data-type="info"] { color:rgb(0, 140, 255); }
+#notice[data-type="success"] { color: rgb(33, 224, 62); }
+#notice[data-type="warn"] { color:rgb(201, 115, 24); }
+#notice[data-type="error"] { color:rgb(197, 17, 17); }
+
+
+/*Gamepad*/
+.page_footer.gamepad-only {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: left;
+    height: 100px;
+    color: white;
+    font-size: 24px;
+    padding-left: var(--side-margin);
+    display:flex;
+    justify-content: space-between;
+}
+
+.page_footer .footer_buttons {
+    flex: 1;
+}
+
+.page_footer .current_version {
+    margin-right: var(--side-margin);
+    margin-top: 12px;
+    color: rgb(133, 141, 150);
+}
+
+.page_footer.gamepad-only img {
+    width: 32px;
+    vertical-align: inherit;
+}
+.page_footer.gamepad-only p {
+    float: left;
+    vertical-align: sub;
+    margin-right: 20px;
+    line-height:32px;
+    display:flex;
+    flex-direction:row;
+    align-items: center;
+}
+
+body[data-gamepad-enabled="true"] #server-list-wrap {
+    height: calc(100% - var(--header-top-height) - 100px);
+	width: calc(100% - var(--side-margin) - var(--side-margin) );
+}
+
+/* Let's get this party started */
+::-webkit-scrollbar {
+    width: 12px;
+}
+ 
+/* Track */
+::-webkit-scrollbar-track {
+    border-radius: 0;
+    background-color: rgba(38, 50, 65, 0.075);
+    width: 6px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+    border-radius: 0;
+    background-color: rgba(155, 170, 188, 0.788);
+    width: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(155, 170, 188, 0.938);
+}
+::-webkit-scrollbar-thumb:window-inactive {
+	background: rgb(98, 106, 116); 
+}
+
+.page_footer a:hover {
+    text-decoration: underline;
+}
+
+#population {
+    color: rgb(133, 141, 150);
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.playlist-tabs {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.playlist-tabs ul {
+    display:flex;
+    list-style:none;
+    flex-direction: row;
+    padding:0;
+    margin:0;
+    flex: 1;
+}
+
+.playlist-tabs ul li  {
+    text-align: center;
+}
+
+.playlist-tabs ul li a {
+    padding-right: 30px;
+    font-size: 33px;
+    text-transform:uppercase;
+    color: rgb(133, 141, 150);
+    text-decoration: none;
+    padding-top: 10px;
+    padding-bottom:10px;
+    outline: none;
+}
+
+.playlist-tabs ul li a:hover {
+    color: rgb(187, 200, 216);
+}
+
+.playlist-tabs ul li a.active {
+    color:white;
+    outline: none;
+}
+
+.server-list tbody tr.pinned {
+    color:yellow;
+}
+
+:root {
+	--legend-button-fontsize: 24px !important;
+}

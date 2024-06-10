@@ -1,0 +1,197 @@
+<!doctype html>
+<html>
+    <head>
+        <title>ElDewrito Scoreboard</title>
+        <!-- Common Include -->
+        <script src="dew://lib/dew.js"></script>
+        <script src="dew://lib/jquery-2.2.1.min.js"></script>   
+        <!-- Window Resize-->
+        <script src="dew://lib/window-resize.js"></script>
+        <link rel="stylesheet" type="text/css" href="dew://lib/window-resize.css"/>
+        
+        <script src="dew://lib/vue.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="scoreboard.css"/> 
+		<link rel="stylesheet" type="text/css" href="dew://lib/ingame_voting/ingame_voting.css"/>
+    </head>
+    <body>
+         <!-- app -->
+        <div id="container">
+            <div class="page_content"  id="app">
+				<div id="chatVoteWidget" class="chat_vote_widget">
+				</div>
+                <div id="window" :class="{expanded:expanded}" :key="gameId"  v-if="valid">
+                    <div v-if="gameFinished" id="winnerText">
+                        <span v-if="gameTied" class="winner">Tie!</span>
+                        <span v-else class="winner">{{ winnerName }} wins!</span>
+                    </div>
+					<div v-else-if="multiround" id="roundText">
+						<span v-if="roundOver" class="round">ROUND OVER</span>
+						<span v-else class="round">Round {{ currentRound }} of {{ roundCount  }}</span>
+                    </div>
+                     <!-- scoreboard-->
+                    <table class="scoreboard" >
+                        <thead>
+                            <tr id="header">
+                                <th class="rank"></th>
+                                <th style="padding-left:5px" class="headerText name" :colspan="playerNameColumnSpan">Players ({{ playerCount }}/{{ maxPlayers }})</th>
+                                <template v-if="expanded && lobbyType != 0 && lobbyType != 5">
+                                    <template v-if="gameType == 1">
+                                        <th class="headerText">Kills</th>
+                                        <th class="headerText">Flag Kills</th>
+                                    </template>
+                                    <template v-else-if="gameType == 3">
+                                        <th class="headerText">Kills</th>
+                                        <th class="headerText">Ball Kills</th>
+                                    </template>
+                                    <template v-else-if="gameType == 4">
+                                        <th class="headerText">Kills</th>
+                                        <th class="headerText">King Kills</th>
+                                        <th class="headerText">Time In Hill</th>
+                                        <th class="headerText">Controlling</th>
+                                    </template>
+                                    <template v-else>
+                                        <th class="headerText">Kills</th>
+                                        <th class="headerText">Assists</th>
+                                        <th class="headerText">Deaths</th>
+                                        <th class="headerText">Best Streak</th>
+                                    </template>
+                                </template>
+                                <th v-if="lobbyType != 0 && lobbyType != 5" class="headerText score">Score</th>
+                                <th v-if="multiround" class="headerText score">Round</th>
+                                <!-- Ping Modifs -->
+                                <th class="headerText score">Ping</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playerList">
+                            <tr v-for="row in rows" :is="row.type == 1 ? 'team-row' : 'player-row'" :key="row.id" :data="row" 
+                                v-on:contextmenu="openPlayerContextMenu"></tr>
+                        </tbody>
+                    </table>
+                    <div id="gameStarting">
+                        <img id="outerring" src="dew://assets/scoreboard/outer_ring.png">
+                        <img id="innerring" src="dew://assets/scoreboard/inner_ring.png">
+                        <span id="startingText">Starting Game...</span>
+                    </div>
+                </div>
+                 <!-- context menu -->
+                <div v-if="playerContextMenuShown" class="contextMenuOverlay" @click="closePlayerContextMenu" @contextmenu.prevent="closePlayerContextMenu">
+                    <ul class="scoreboardContextMenu"
+                        :style="{ left: playerContextMenuLeft + 'px', top: playerContextMenuTop + 'px' }">
+                        <li class="scoreboardContextMenuItem" @click="banSelectedPlayer" v-if="isHost">Ban</li>
+                        <li class="scoreboardContextMenuItem" @click="kickSelectedPlayer" v-if="isHost">Kick</li>
+                        <li class="scoreboardContextMenuItem" @click="kickSelectedPlayer" v-if="!isHost">Vote To Kick</li>
+                        <li class="scoreboardContextMenuItem" @click="reportSelectedPlayer">Report</li>
+                        <li class="scoreboardContextMenuItem" @click.prevent.stop="" @click="muteSelectedPlayer" >{{ selectedPlayerMuted ? "Unmute" : "Mute"}}</li>
+                        <li class="scoreboardContextMenuItem" @click.prevent.stop="">
+                            Voice Volume
+                            <input type="range" min="0" max="200" step="1" v-model="selectedPlayerVolume"
+                                @click.prevent.stop="" @change="updateSelectedPlayerVolume">
+                        </li>    
+                    </ul>
+                </div>
+				<div id="playerBreakdown">
+					<div class="statsHeader">PLAYER STATS</div>
+					<div id="playerName"></div>
+					<div id="playerKills"></div>
+					<div id="playerDeaths"></div>
+					<div id="playerKDSpread"></div>
+					<div id="playerSuicides"></div>
+					<br>
+					<div id="toolOfDestruction"><table><thead><tr><td>Tool of Destruction:</tr></td></thead><tbody></tbody></table></div>
+					<br>
+					<table id="killedMost"><thead><tr><td>Killed Most</td><td style="text-align:center;">Kills</td></tr></thead><tbody></tbody></table>
+					<table id="killedMostBy"><thead><tr><td>Killed Most By</td><td style="text-align:center;">Kills</td></tr></thead><tbody></tbody></table>
+					<div id="bigMedal">
+						<img id="bigMedalImage" data-pak="game" data-url="">
+						<span class="medalName"></span>
+						<span class="medalDesc"></span>
+					</div>
+					<div id="medalBox"></div>
+					<div class="bottomBar">
+						<button id="previousPlayer"><img class='button'>Previous Player</button>
+						<button id="nextPlayer"><img class='button'>Next Player</button>
+						<button id="windowClose" onclick="closePlayerBreakdown(true);"><img class='button'>Close</button>
+					</div>
+				</div>
+				<div id="serverName"></div>
+				<div id="mapName"></div>
+				<div id="modName"></div>
+				<div id="modInfoButton">Mod Info<img class='button'></div>
+				<div id="closeButton">Close<img class='button'></div>
+            </div>
+        </div>  
+         <!-- team row template-->
+        <template id="team-row-template">
+            <tr :class="{ 'hidden' : data.startHidden }" class="player teamHeader" :style="{background: data.color}">
+                <td class="rank">{{ place }}</td>
+                <td class="name teamName" :colspan="playerNameColumnSpan">{{ data.name }}</td>
+                <td class="score">{{ multiround ? data.total : data.score }}</td>
+                <td v-if="multiround" class="score">{{ data.score  }}</td>
+            </tr> 
+        </template>
+        <!-- player row template-->
+        <template id="player-row-template">
+            <tr :class="{'disconnected player': disconnected(data),'player clickable': !disconnected(data),selected: isSelected,hidden: data.startHidden}" :style="{background: color}" v-on:click="clickPlayer(data)" v-on:contextmenu="$emit('contextmenu', $event, data)">
+                <td class="rank">{{ (lobbyType == 0 || lobbyType == 5) ? "" : place }}</td>
+                <td :id="escapeName(data.name)" :colspan="data.rank != -1 ? 1 : 2" class="playerName name">
+					
+					<img v-if="data.hasObjective && gameType == 3" class="emblem gameObjective" src="dew://assets/emblems/oddball.png">
+					<img v-if="data.hasObjective && gameType == 1" class="emblem gameObjective" src="dew://assets/emblems/ctf.png">
+					<img v-if="data.hasObjective && gameType == 9" class="emblem gameObjective" src="dew://assets/emblems/assault.png">
+					<img v-if="data.hasObjective && gameType == 10"  class="emblem gameObjective" src="dew://assets/emblems/infected.png">
+
+                    <img v-show="data.isDead" class="emblem player-emblem" src="dew://assets//emblems/dead.png">
+                    <img v-show="!data.isDead" class="emblem player-emblem" :src="data.emblem" onerror="this.onerror=null;this.src='dew://assets/emblems/generic.png';">
+                    {{ data.name }}
+					
+					<img :class="hasSpoken(data) ? (data.hasObjective ? 'hasSpokenObjective emblem speaker talking' : 'emblem speaker talking') : (data.hasObjective ? 'hasSpokenObjective emblem speaker' : 'emblem speaker')" v-on:click.stop="toggleMuteSelectedPlayer(data)" style="float:left" src="dew://assets/emblems/speaker-off.png">
+					
+					<!-- img v-if="isInVoip(data.name) == false" class="emblem speaker" style="float:left" -->
+					
+                    <img v-show="data.isHost" class="emblem" style="float:right;padding-right:3px" src="dew://assets/emblems/crown.png">
+                </td>
+                <td class="serviceTag">{{ data.stag }}</td>
+                <td v-if="data.rank != -1" class="playerRank"><img class="rankimg" :src="`dew://assets/ranks/${data.rank}.png`"></td>
+                <template v-if="expanded && lobbyType != 0 && lobbyType != 5">
+                    <template v-if="gameType == 1">
+                        <td class="stat">{{ data.kills }}</td>
+                        <td class="stat">{{ data.flagKills }}</td>
+                    </template>
+                    <template v-else-if="gameType == 3">
+                        <td class="stat">{{ data.kills }}</td>
+                        <td class="stat">{{ data.ballKills }}</td>
+                    </template>
+                    <template v-else-if="gameType == 4">
+                        <td class="stat">{{ data.kills }}</td>
+                        <td class="stat">{{ data.kingsKilled }}</td>
+                        <td class="stat">{{ data.timeInHill }}</td>
+                        <td class="stat">{{ data.timeControllingHill }}</td>
+                    </template>
+                    <template v-else>
+                        <td class="stat">{{ data.kills }}</th>
+                        <td class="stat">{{ data.assists }}</td>
+                        <td class="stat">{{ data.deaths }}</td>
+                        <td class="stat">{{ data.bestStreak }}</td>
+                    </template>
+                </template>
+                <td v-if="lobbyType != 0 && lobbyType != 5" class="score">
+					{{ multiround ? data.total : data.score }}
+					<!-- Ping Modifs <img v-show="(data.showPing && !multiround)" class="player-ping" :src="data.ping">-->
+				</td>
+                <td v-if="multiround" class="score">
+					{{ data.score }}
+					<!-- Ping Modifs <img v-show="(data.showPing)" class="player-ping" :src="data.ping">-->
+				</td>
+                <!-- Ping Modifs --> 
+                <td>
+                    {{ data.ping }}
+				</td>
+            </tr>
+        </template>
+         <!-- scripts -->
+		<script src="dew://lib/pak-aware-context.js"></script>
+        <script src="scoreboard.js"></script>
+		<script src="dew://lib/ingame_voting/ingame_voting.js"></script>
+    </body>
+
+</html>
