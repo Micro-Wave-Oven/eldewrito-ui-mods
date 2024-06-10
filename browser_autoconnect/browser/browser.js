@@ -50,78 +50,77 @@ var lastIsPrivate = undefined;
 sessionStorage.setItem("autoconnect", false);
 
 dew.on("browser-autoconnect", function (ev) {
-	console.log("[browser.js]", "dew.on -> \"browser-autoconnect\"");
-	autoConnect(lastServer, lastCurrentTry + 10, lastIsPrivate);
+    autoConnect(lastServer, lastCurrentTry + 10, lastIsPrivate);
 });
 
 
 document.getElementById('cancel').addEventListener('click', function() {
     dew.playSound("x_button");
-	cancelQueue();
+    cancelQueue();
 });
 
 function cancelQueue() {
-	document.getElementById("cancel").disabled = true;
-	document.getElementById("retries").textContent = "";
-	if (cancelTimeout !== undefined) {
-		clearTimeout(cancelTimeout);
-		cancelTimeout = undefined;
-	}
+    document.getElementById("cancel").disabled = true;
+    document.getElementById("retries").textContent = "";
+    if (cancelTimeout !== undefined) {
+        clearTimeout(cancelTimeout);
+        cancelTimeout = undefined;
+    }
 }
 
 function autoConnect(server, currentTry, isPrivate) {
-	
-	document.getElementById("retries").textContent = `${currentTry}/${maxRetries}`;
-	
-	// Cancels the queue
-	if (currentTry > maxRetries) {
-		dew.playSound("error");
-		cancelQueue();
-		return;
-	}
-	
-	fetch(`http://${server}`)
-	.then(response => response.json())
-	.then(data => {
-		
-		if (data.numPlayers < data.maxPlayers) {
-			
-			cancelQueue();
-			
-			sessionStorage.setItem("autoconnect", true);
-			lastServer = server;
-			lastCurrentTry = currentTry;
-			lastIsPrivate = isPrivate;
-			
-			dew.playSound("alt_timer_sound");
-			setTimeout(() => { dew.playSound("alt_timer_sound"); }, 150);
-			
-			if (!isPrivate) {
-				dew.command(`Server.connect ${server}`);
-			} else {
-				promptPassword(server);
-			}
-			
-		} else {
-			
-			if (document.getElementById("cancel").disabled == true) {
-				return;
-			}
-			cancelTimeout = setTimeout( 
-				function() { autoConnect(server, currentTry + 1, isPrivate) }, 
-				delayRetrySeconds * 1000
-			);
-		}
-	})
-	.catch(error => {
-		if (document.getElementById("cancel").disabled == true) {
-			return;
-		}
-		cancelTimeout = setTimeout( 
-			function() { autoConnect(server, currentTry + 1, isPrivate) }, 
-			delayRetrySeconds * 1000
-		);
-	});
+    
+    document.getElementById("retries").textContent = `${currentTry}/${maxRetries}`;
+    
+    // Cancels the queue
+    if (currentTry > maxRetries) {
+        dew.playSound("error");
+        cancelQueue();
+        return;
+    }
+    
+    fetch(`http://${server}`)
+    .then(response => response.json())
+    .then(data => {
+        
+        if (data.numPlayers < data.maxPlayers) {
+            
+            cancelQueue();
+            
+            sessionStorage.setItem("autoconnect", true);
+            lastServer = server;
+            lastCurrentTry = currentTry;
+            lastIsPrivate = isPrivate;
+            
+            dew.playSound("alt_timer_sound");
+            setTimeout(() => { dew.playSound("alt_timer_sound"); }, 150);
+            
+            if (!isPrivate) {
+                dew.command(`Server.connect ${server}`);
+            } else {
+                promptPassword(server);
+            }
+            
+        } else {
+            
+            if (document.getElementById("cancel").disabled == true) {
+                return;
+            }
+            cancelTimeout = setTimeout( 
+                function() { autoConnect(server, currentTry + 1, isPrivate) }, 
+                delayRetrySeconds * 1000
+            );
+        }
+    })
+    .catch(error => {
+        if (document.getElementById("cancel").disabled == true) {
+            return;
+        }
+        cancelTimeout = setTimeout( 
+            function() { autoConnect(server, currentTry + 1, isPrivate) }, 
+            delayRetrySeconds * 1000
+        );
+    });
 }
 
 serverListWidget.on('select', function(e) {
@@ -130,23 +129,23 @@ serverListWidget.on('select', function(e) {
         return;
 
     e.preventSound();
-	
-	document.getElementById("cancel").disabled = false;
-	if (cancelTimeout !== undefined) {
-		clearTimeout(cancelTimeout);
-		cancelTimeout = undefined;
-	}
-	autoConnect(server, 1, e.element.dataset.type == "private" ? true : false);
-	
+    
+    document.getElementById("cancel").disabled = false;
+    if (cancelTimeout !== undefined) {
+        clearTimeout(cancelTimeout);
+        cancelTimeout = undefined;
+    }
+    autoConnect(server, 1, e.element.dataset.type == "private" ? true : false);
+    
     // AutoConnect Modifs
-	/*
+    /*
     if(e.element.dataset.type == "private") {
         promptPassword(server);
     } else {
         dew.command(`Server.connect ${server}`);
         dew.playSound("a_button");
     }
-	*/
+    */
 });
 
 // End AutoConnect Modifs

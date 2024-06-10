@@ -858,19 +858,17 @@ let App = new Vue({
             }
         },
         onDialogRequest(evt) {
-			
-			// AutoConnect Modifs
-			if (sessionStorage.getItem("autoconnect") != undefined && sessionStorage.getItem("autoconnect")) {
-				sessionStorage.setItem("autoconnect", false);
-				if (evt.data.template != undefined && evt.data.template.indexOf("server_connect_error_retry") > -1) {
-					dew.notify("browser-autoconnect");
-					console.log("[dialog.js]", "Error connecting");
-					console.log("[dialog.js]", evt);
-					return;
-				}
-			}
-			
-			
+            
+            // AutoConnect Modifs
+            if (sessionStorage.getItem("autoconnect") != undefined && sessionStorage.getItem("autoconnect")) {
+                sessionStorage.setItem("autoconnect", false);
+                if (evt.data.template != undefined && evt.data.template.indexOf("server_connect_error_retry") > -1) {
+                    dew.notify("browser-autoconnect");
+                    return;
+                }
+            }
+            
+            
             let self = this;
             let data = evt.data;
 
