@@ -10,6 +10,8 @@ Each folder contains a specific feature.
 
 To install said feature, just get the folder(s) inside said feature folder and drop them to merge inside the game\ui\screens\ directory.
 
+For example, with the browser autoconnect, drop the browser and dialog folders inside the game\ui\screens\ folder to merge them with the existing browser and dialog folders.
+
 If you need help to figure it out, DM me on Discord at microwave.oven.
 
 
