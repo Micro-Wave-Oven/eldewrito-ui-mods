@@ -46,11 +46,11 @@ const maxRetries = 150;
 var cancelTimeout = undefined;
 var lastServer = undefined;
 var lastCurrentTry = undefined;
-var lastIsPrivate = undefined;
+var lastServerPassword = undefined;
 sessionStorage.setItem("autoconnect", false);
 
 dew.on("browser-autoconnect", function (ev) {
-    autoConnect(lastServer, lastCurrentTry + 10, lastIsPrivate);
+    autoConnect(lastServer, lastCurrentTry + 10, lastServerPassword);
 });
 
 
@@ -68,7 +68,7 @@ function cancelQueue() {
     }
 }
 
-function autoConnect(server, currentTry, isPrivate) {
+function autoConnect(server, currentTry, serverPassword) {
     
     document.getElementById("retries").textContent = `${currentTry}/${maxRetries}`;
     
@@ -90,15 +90,15 @@ function autoConnect(server, currentTry, isPrivate) {
             sessionStorage.setItem("autoconnect", true);
             lastServer = server;
             lastCurrentTry = currentTry;
-            lastIsPrivate = isPrivate;
+            lastServerPassword = serverPassword;
             
             dew.playSound("alt_timer_sound");
             setTimeout(() => { dew.playSound("alt_timer_sound"); }, 150);
             
-            if (!isPrivate) {
-                dew.command(`Server.connect ${server}`);
+            if (serverPassword != undefined) {
+                dew.command(`Server.connect ${server} ${serverPassword}`);
             } else {
-                promptPassword(server);
+                dew.command(`Server.connect ${server}`);
             }
             
         } else {
@@ -107,7 +107,7 @@ function autoConnect(server, currentTry, isPrivate) {
                 return;
             }
             cancelTimeout = setTimeout( 
-                function() { autoConnect(server, currentTry + 1, isPrivate) }, 
+                function() { autoConnect(server, currentTry + 1, serverPassword) }, 
                 delayRetrySeconds * 1000
             );
         }
@@ -117,13 +117,14 @@ function autoConnect(server, currentTry, isPrivate) {
             return;
         }
         cancelTimeout = setTimeout( 
-            function() { autoConnect(server, currentTry + 1, isPrivate) }, 
+            function() { autoConnect(server, currentTry + 1, serverPassword) }, 
             delayRetrySeconds * 1000
         );
     });
 }
 
 serverListWidget.on('select', function(e) {
+    
     let server = e.element.dataset.ip;
     if(!server)
         return;
@@ -135,7 +136,18 @@ serverListWidget.on('select', function(e) {
         clearTimeout(cancelTimeout);
         cancelTimeout = undefined;
     }
-    autoConnect(server, 1, e.element.dataset.type == "private" ? true : false);
+    
+    if (e.element.dataset.type == "private") {
+        dew.dialog('server_password').then(password => {
+            if(password.length > 0) {
+                autoConnect(server, 1, password);
+                dew.playSound("a_button");
+            }
+        });
+    } else {
+        autoConnect(server, 1, undefined);
+    }
+    
     
     // AutoConnect Modifs
     /*
