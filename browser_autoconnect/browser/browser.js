@@ -108,7 +108,7 @@ function autoConnect(server, currentTry, isPrivate) {
 				return;
 			}
 			cancelTimeout = setTimeout( 
-				function() { autoConnect(server, currentTry + 1) }, 
+				function() { autoConnect(server, currentTry + 1, isPrivate) }, 
 				delayRetrySeconds * 1000
 			);
 		}
@@ -118,7 +118,7 @@ function autoConnect(server, currentTry, isPrivate) {
 			return;
 		}
 		cancelTimeout = setTimeout( 
-			function() { autoConnect(server, currentTry + 1) }, 
+			function() { autoConnect(server, currentTry + 1, isPrivate) }, 
 			delayRetrySeconds * 1000
 		);
 	});
