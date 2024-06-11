@@ -493,11 +493,6 @@ function ping(info) {
                 rejeect();
             }
 			
-			// Hide servers Modifs
-            if ( data.name.includes("G-Money") || data.name.includes("Halo Playground") ) {
-                return;
-            }
-			
             if(data.name)
                 data.name = data.name.replace(/\bhttp[^ ]+/ig, '');
 
