@@ -37,9 +37,9 @@ Note that the actual ping is not very accurate.
 
 Puts the chat more to the side, lowers the font and a few other changes so the chat doesn't take too much of the screen.
 
-| Before                               | After                               |
-| ------------------------------------ | ----------------------------------- |
-| ![before](resources/chat_before.jpg) | ![after](resources/chat_before.jpg) |
+| Before                               | After                              |
+| ------------------------------------ | ---------------------------------- |
+| ![before](resources/chat_before.jpg) | ![after](resources/chat_after.jpg) |
 
 
 
