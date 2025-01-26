@@ -1,14 +1,16 @@
 @font-face{font-family:"Conduit ITC";src:url(dew://lib/Conduit-ITC.woff);}
+
 body {
     margin: 0;
-    font-family: "Conduit ITC", sans-serif;
     overflow: hidden;
 }
 
 #chat {
     position: absolute;
-    font-size: 14px;
-    line-height: 21px;
+    
+    font-size: 12px;
+    line-height: 17px;
+    
     letter-spacing: 0.3px;
     color: white;
     overflow: hidden;
@@ -51,8 +53,10 @@ body {
 }
 
 #chatWindow p{
-    margin: 0;
+    margin: 1px 0 0 0;
+    
     padding-top: 2px;
+	font-family: "Calibri";
 }
 
 #chatWindow > p:first-child {
@@ -95,6 +99,7 @@ body {
     color: white; 
     margin-right: 4px;
     height: 14px;
+    white-space: nowrap;
 }
 
 .GLOBAL, .TEAM, a {
@@ -114,7 +119,7 @@ a:hover{
 }
 
 .SERVER{
-    color: #FFFF00;
+    color: #FF9000;
 }
 
 .WHISPER{
@@ -147,7 +152,7 @@ a:hover{
 }
 
 #chatWindow::-webkit-scrollbar {
-    width: 20px;
+    width: 5px;
 }
 
 #chatWindow::-webkit-scrollbar-thumb {
