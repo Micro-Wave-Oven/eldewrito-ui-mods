@@ -42,6 +42,10 @@ Puts the chat more to the side, lowers the font and a few other changes so the c
 | ![before](resources/chat_before.jpg) | ![after](resources/chat_after.jpg) |
 
 
+Also notifies in chat when a player leaves or joins.
+![notif](resources/notif.png)
+
+
 
 ## Revert changes
 
