@@ -56,7 +56,7 @@ $(document).ready(function(){
             // Auto Camera Tracking Commands
             var posIndex = Math.max(
                 chatBoxInput.toLowerCase().indexOf("/posa"),
-                chatBoxInput.toLowerCase().indexOf("/startPos")
+                chatBoxInput.toLowerCase().indexOf("/startpos")
             );
             if (posIndex >= 0) {                
                 dew.command('Camera.Position', {}).then(function(response) {
