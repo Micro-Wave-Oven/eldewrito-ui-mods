@@ -55,31 +55,17 @@ $(document).ready(function(){
             
             // Auto Camera Tracking Commands
             var posIndex = chatBoxInput.toLowerCase().indexOf("/posa");
-            if (posIndex == 0) {
-                var reverse = chatBoxInput.substring(posIndex + 6).includes("r");
-                
+            if (posIndex == 0) {                
                 dew.command('Camera.Position', {}).then(function(response) {
-                    
-                    posA = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
-                    if (reverse) {
-                        posA[3] += 2 * Math.PI;
-                    }
-                    
+                    posA = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);                    
                     dew.notify("chat", { message: "Position A: " + JSON.stringify(posA), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 });
             }
             
             var posIndex = chatBoxInput.toLowerCase().indexOf("/posb");
-            if (posIndex == 0) {
-                var reverse = chatBoxInput.substring(posIndex + 6).includes("r");
-                
+            if (posIndex == 0) {                
                 dew.command('Camera.Position', {}).then(function(response) {
-                    
                     posB = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
-                    if (reverse) {
-                        posB[3] += 2 * Math.PI;
-                    }
-                    
                     dew.notify("chat", { message: "Position B: " + JSON.stringify(posB), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 });
             }
