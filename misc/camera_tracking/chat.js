@@ -54,49 +54,108 @@ $(document).ready(function(){
             
             
             // Auto Camera Tracking Commands
-            var posIndex = chatBoxInput.toLowerCase().indexOf("/posa");
-            if (posIndex == 0) {                
+            var posIndex = Math.max(
+                chatBoxInput.toLowerCase().indexOf("/posa"),
+                chatBoxInput.toLowerCase().indexOf("/startPos")
+            );
+            if (posIndex >= 0) {                
                 dew.command('Camera.Position', {}).then(function(response) {
-                    posA = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);                    
-                    dew.notify("chat", { message: "Position A: " + JSON.stringify(posA), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    posA = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
+                    dew.notify("chat", { message: "Start Position: " + JSON.stringify(posA), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 });
             }
             
-            var posIndex = chatBoxInput.toLowerCase().indexOf("/posb");
-            if (posIndex == 0) {                
+            var posIndex = Math.max(
+                chatBoxInput.toLowerCase().indexOf("/posb"),
+                chatBoxInput.toLowerCase().indexOf("/endpos")
+            );
+            if (posIndex >= 0) {
                 dew.command('Camera.Position', {}).then(function(response) {
-                    posB = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
-                    dew.notify("chat", { message: "Position B: " + JSON.stringify(posB), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    posB = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);                    
+                    dew.notify("chat", { message: "End Position: " + JSON.stringify(posB), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 });
             }
+            
             
             var posIndex = chatBoxInput.toLowerCase().indexOf("/midpos");
-            if (posIndex == 0) {
+            if (posIndex >= 0) {
+                
+                var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 7).trim().replace(/  +/g, ' ').split(" ");
+                console.log(curr_command);
                 
                 // List points
-                if (chatBoxInput.toLowerCase().substring(posIndex + 8).includes("l")) {
-                    dew.notify("chat", { message: "Mid positions: " + JSON.stringify(midPos), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                if (curr_command[0] == "l" || curr_command[0] == "ls" || curr_command[0] == "list") {
+                    dew.notify("chat", { message: "Mid positions: ", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
+                
                 
                 // Clear points
-                } else if (chatBoxInput.toLowerCase().substring(posIndex + 8).includes("c")) {
+                } else if (curr_command[0] == "c" || curr_command[0] == "clear") {
                     midPos = [];
-                    dew.notify("chat", { message: "Mid positions: " + JSON.stringify(midPos), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "Mid positions cleared.", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                
                 
                 // Add point
-                } else if (chatBoxInput.toLowerCase().substring(posIndex + 8).includes("a")) {
+                } else if (curr_command[0] == "a" || curr_command[0] == "add") {
                 
                     dew.command('Camera.Position', {}).then(function(response) {
                         
                         tempPos = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
+                        
+                        if (curr_command.length >= 2) {
+                            tempPos.push(curr_command[1]);
+                        }
+                        
                         midPos.push(tempPos);
                         
-                        dew.notify("chat", { message: "Added to mid positions: " + JSON.stringify(midPos), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                        dew.notify("chat", { message: "Added to mid positions:", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                        midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
                     });
+                
+                
+                // Delete Point
+                } else if (curr_command[0] == "d" || curr_command[0] == "del" || curr_command[0] == "delete") {
+                    
+                    if (curr_command.length == 1) {
+                        dew.notify("chat", { message: "You need to enter the index of the position you want to delete, for example: /midpos " + curr_command[0] + " 1", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    } else {
+                        
+                        var id_to_delete = parseInt(curr_command[1]);
+                        if (id_to_delete >= midPos.length) {
+                            dew.notify("chat", { message: "Incorrect id, do \"/midpos list\" to find the correct id", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                        
+                        } else {
+                            midPos.splice(id_to_delete, 1);
+                            midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
+                        }
+                    }
+                
+                
+                // Move point
+                } else if (curr_command[0] == "m" || curr_command[0] == "mv" || curr_command[0] == "move") {
+                    
+                    if (curr_command.length != 3) {
+                        dew.notify("chat", { message: "Missing positions, usage: /midpos " + curr_command[0] + " <from> <to>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    } else {
+                        var from = parseInt(curr_command[1]);
+                        var to = parseInt(curr_command[2]);
+                    
+                        var tmp_val = midPos[from];
+                        midPos.splice(from, 1);
+                        midPos.splice(to, 0, tmp_val);
+                        
+                        dew.notify("chat", { message: "Moved:", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                        midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
+                    }
+                
                 
                 // Display help
                 } else {
-                    dew.notify("chat", { message: "Add point: /midpos a", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "Add point: /midpos a <OPTIONAL NAME>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: "List points: /midpos l", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "Move point: /midpos mv <from> <to>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "Delete point: /midpos del <index>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: "Clear points: /midpos c", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 }
                 
@@ -104,11 +163,13 @@ $(document).ready(function(){
                 return;
             }
             
+            
             var intervalIndex = chatBoxInput.toLowerCase().indexOf("/interval");
-            if (intervalIndex == 0) {
+            if (intervalIndex >= 0) {
                 cameraIntervalMs = parseInt(chatBoxInput.substring(intervalIndex + 10));
                 dew.notify("chat", { message: "Camera Interval: " + cameraIntervalMs, sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
             }
+            
             
             var cameraIndex = chatBoxInput.toLowerCase().indexOf("/camera");
             if (cameraIndex >= 0) {
@@ -122,15 +183,10 @@ $(document).ready(function(){
                 dew.command("Camera.Mode static");
                 
                 var timeValue = parseFloat(chatBoxInput.substring(cameraIndex + 8));
-                
                 var timeInMs = timeValue * 1000;
-                
                 var nbTracks = 1 + midPos.length;
-                
                 var steps = parseInt(timeInMs / cameraIntervalMs);
-                
                 steps = steps + (nbTracks - (steps % nbTracks)) - nbTracks + 1;
-                
                 var trackSize = Math.floor(steps / nbTracks);
                 
                 
