@@ -74,16 +74,16 @@ $(document).ready(function(){
             if (posIndex == 0) {
                 
                 // List points
-                if (chatBoxInput.substring(posIndex + 8).includes("l")) {
+                if (chatBoxInput.toLowerCase().substring(posIndex + 8).includes("l")) {
                     dew.notify("chat", { message: "Mid positions: " + JSON.stringify(midPos), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 
                 // Clear points
-                } else if (chatBoxInput.substring(posIndex + 8).includes("c")) {
+                } else if (chatBoxInput.toLowerCase().substring(posIndex + 8).includes("c")) {
                     midPos = [];
                     dew.notify("chat", { message: "Mid positions: " + JSON.stringify(midPos), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 
                 // Add point
-                } else if (chatBoxInput.substring(posIndex + 8).includes("a")) {
+                } else if (chatBoxInput.toLowerCase().substring(posIndex + 8).includes("a")) {
                 
                     dew.command('Camera.Position', {}).then(function(response) {
                         
