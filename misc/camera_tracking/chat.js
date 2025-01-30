@@ -687,8 +687,9 @@ $(document).ready(function(){
                 
                 // Fix rotation wrap issue
                 for (let i = 1; i < hPosVals.length; i++) {
+                    
                     if ((hPosVals[i - 1] - hPosVals[i]) > Math.PI) {
-                        let diff = hPosVals[i - 1] - hPosVals[i];
+                        let diff = Math.abs(hPosVals[i - 1] - hPosVals[i]);
                         let amnt = parseInt(diff / (2 * Math.PI)) + 1;
                         
                         hPosVals[i] += amnt * 2 * Math.PI;
@@ -698,7 +699,20 @@ $(document).ready(function(){
                             hPosVals[i] -= 2 * Math.PI;
                         }
                     }
+                    
+                    if ((hPosVals[i] - hPosVals[i - 1]) > Math.PI) {
+                        let diff = Math.abs(hPosVals[i - 1] - hPosVals[i]);
+                        let amnt = parseInt(diff / (2 * Math.PI)) + 1;
+                        
+                        hPosVals[i] -= amnt * 2 * Math.PI;
+                        
+                        // This is so jank
+                        if (Math.abs(hPosVals[i - 1] - hPosVals[i]) > Math.PI) {
+                            hPosVals[i] += 2 * Math.PI;
+                        }
+                    }
                 }
+                
                 
                 // Create interpolators
                 var xValInterpolator = createCubicSplineInterpolator(durations, xPosVals);
