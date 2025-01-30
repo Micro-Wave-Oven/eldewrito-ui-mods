@@ -92,7 +92,7 @@ $(document).ready(function(){
             var posIndex = chatBoxInput.toLowerCase().indexOf("/midpos");
             if (posIndex >= 0) {
                 
-                var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 7).trim().replace(/  +/g, ' ').split(" ");
+                var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 8).trim().replace(/  +/g, ' ').split(" ");
                 
                 // List points
                 if (curr_command[0] == "l" || curr_command[0] == "ls" || curr_command[0] == "list") {
@@ -203,14 +203,17 @@ $(document).ready(function(){
                 
                 let popup_p = document.createElement("p");
                 popup_p.innerText = "Export: Copy/Paste only";
+                popup_p.style.color = "black";
+                popup_p.style.background = "white";
+                popup_p.style.borderRadius = "4px";
                 popup_p.style.width = "100%";
-                popup_p.style.width = "2%";
+                popup_p.style.height = "4%";
                 
                 let popup_textarea = document.createElement("textarea");
                 popup_textarea.id = "camera_popup_textarea_id";
                 popup_textarea.value = data;
                 popup_textarea.style.width = "100%";
-                popup_textarea.style.height = "90%";
+                popup_textarea.style.height = "85%";
                 
                 let popup_close_button = document.createElement("button");
                 popup_close_button.textContent = "Close";
@@ -257,14 +260,17 @@ $(document).ready(function(){
                 
                 let popup_p = document.createElement("p");
                 popup_p.innerText = "Import: Copy/Paste only";
+                popup_p.style.color = "black";
+                popup_p.style.background = "white";
+                popup_p.style.borderRadius = "4px";
                 popup_p.style.width = "100%";
-                popup_p.style.width = "2%";
+                popup_p.style.height = "4%";
                 
                 let popup_textarea = document.createElement("textarea");
                 popup_textarea.id = "camera_popup_textarea_id";
                 popup_textarea.value = data;
                 popup_textarea.style.width = "100%";
-                popup_textarea.style.height = "90%";
+                popup_textarea.style.height = "85%";
                 
                 let popup_close_button = document.createElement("button");
                 popup_close_button.textContent = "Close and Import";
@@ -693,12 +699,18 @@ $(document).ready(function(){
                 vPosVals.push(posB[4]);
                 
                 
-                // Fix rotation wrap issue                
+                // Fix rotation wrap issue
                 for (let i = 1; i < hPosVals.length; i++) {
                     if ((hPosVals[i - 1] - hPosVals[i]) > Math.PI) {
-                        let diff = hPosVals[i - 1] - hPosVals[i];                        
+                        let diff = hPosVals[i - 1] - hPosVals[i];
                         let amnt = parseInt(diff / (2 * Math.PI)) + 1;
+                        
                         hPosVals[i] += amnt * 2 * Math.PI;
+                        
+                        // This is so jank
+                        if (Math.abs(hPosVals[i - 1] - hPosVals[i]) > Math.PI) {
+                            hPosVals[i] -= 2 * Math.PI;
+                        }
                     }
                 }
                 
