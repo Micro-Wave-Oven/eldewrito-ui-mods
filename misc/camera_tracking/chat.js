@@ -29,9 +29,7 @@ var cachedPlayerJSON;
 // Auto Camera Tracking
 var posA = undefined;
 var posB = undefined;
-
 var midPos = [];
-
 var currentStep = 0;
 var cameraIntervalMs = 5;
 var cameraInterval = undefined;
@@ -54,6 +52,20 @@ $(document).ready(function(){
             
             
             // Auto Camera Tracking Commands
+            
+            /*
+            // Open chat to cancel current animation
+            // TODO: Make it work
+            if (cameraInterval != undefined) {
+                clearInterval(cameraInterval);
+                cameraInterval = undefined;
+                dew.command("Camera.Mode first");
+                document.getElementById("chat").style.display = "block";
+                chatboxHide();
+                dew.notify("chat", { message: "Animation cancelled", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+            }
+            */
+            
             var posIndex = Math.max(
                 chatBoxInput.toLowerCase().indexOf("/posa"),
                 chatBoxInput.toLowerCase().indexOf("/startpos")
@@ -71,7 +83,7 @@ $(document).ready(function(){
             );
             if (posIndex >= 0) {
                 dew.command('Camera.Position', {}).then(function(response) {
-                    posB = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);                    
+                    posB = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
                     dew.notify("chat", { message: "End Position: " + JSON.stringify(posB), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 });
             }
@@ -170,6 +182,143 @@ $(document).ready(function(){
             }
             
             
+            var dataIndex = chatBoxInput.toLowerCase().indexOf("/export");
+            if (dataIndex >= 0) {
+                var data = {
+                    start: posA,
+                    midPoints: midPos,
+                    end: posB
+                };
+                data = JSON.stringify(data, null, 4);
+                
+                let popup = document.createElement("div");
+                popup.id = "camera_popup_id";
+                popup.style.width = "700px";
+                popup.style.height = "500px";
+                popup.style.position = "absolute";
+                popup.style.position = "absolute";
+                popup.style.top = "50%";
+                popup.style.left = "50%";
+                popup.style.margin = "-250px 0 0 -350px";
+                
+                let popup_p = document.createElement("p");
+                popup_p.innerText = "Export: Copy/Paste only";
+                popup_p.style.width = "100%";
+                popup_p.style.width = "2%";
+                
+                let popup_textarea = document.createElement("textarea");
+                popup_textarea.id = "camera_popup_textarea_id";
+                popup_textarea.value = data;
+                popup_textarea.style.width = "100%";
+                popup_textarea.style.height = "90%";
+                
+                let popup_close_button = document.createElement("button");
+                popup_close_button.textContent = "Close";
+                popup_close_button.style.width = "100%";
+                popup_close_button.style.height = "4%";
+                popup_close_button.onclick = function() {
+                    document.getElementById("camera_popup_id").outerHTML = "";
+                    chatboxHide();
+                };
+                
+                popup.appendChild(popup_p);
+                popup.appendChild(popup_textarea);
+                popup.appendChild(popup_close_button);
+                document.body.appendChild(popup);
+                
+                $("#chatBox").val('');
+                $("#chatBox").hide();
+                $("#chatWindow").css("bottom", "0");
+                $("#chatWindow").addClass("hide-scrollbar");
+                $("#camera_popup_textarea_id").focus()
+                
+                return;
+            }
+            
+            
+            var dataIndex = chatBoxInput.toLowerCase().indexOf("/import");
+            if (dataIndex >= 0) {
+                var data = {
+                    start: posA,
+                    midPoints: midPos,
+                    end: posB
+                };
+                data = JSON.stringify(data, null, 4);
+                
+                let popup = document.createElement("div");
+                popup.id = "camera_popup_id";
+                popup.style.width = "700px";
+                popup.style.height = "500px";
+                popup.style.position = "absolute";
+                popup.style.position = "absolute";
+                popup.style.top = "50%";
+                popup.style.left = "50%";
+                popup.style.margin = "-250px 0 0 -350px";
+                
+                let popup_p = document.createElement("p");
+                popup_p.innerText = "Import: Copy/Paste only";
+                popup_p.style.width = "100%";
+                popup_p.style.width = "2%";
+                
+                let popup_textarea = document.createElement("textarea");
+                popup_textarea.id = "camera_popup_textarea_id";
+                popup_textarea.value = data;
+                popup_textarea.style.width = "100%";
+                popup_textarea.style.height = "90%";
+                
+                let popup_close_button = document.createElement("button");
+                popup_close_button.textContent = "Close and Import";
+                popup_close_button.style.width = "100%";
+                popup_close_button.style.height = "4%";
+                popup_close_button.onclick = function(e) {
+                    
+                    try {
+                        var parsedData = JSON.parse(document.getElementById("camera_popup_textarea_id").value);                        
+                        if (Object.hasOwn(parsedData, 'start')) {
+                            posA = parsedData.start;
+                        }                        
+                        if (Object.hasOwn(parsedData, 'midPoints')) {
+                            midPos = parsedData.midPoints;
+                        }                        
+                        if (Object.hasOwn(parsedData, 'end')) {
+                            posB = parsedData.end;
+                        }
+                    } catch (e) {
+                        dew.notify("chat", { message: "Error parsing data: " + e.toString(), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    }
+                    
+                    
+                    document.getElementById("camera_popup_id").outerHTML = "";
+                    chatboxHide();
+                };
+                
+                let popup_close_button2 = document.createElement("button");
+                popup_close_button2.textContent = "Close and Don't Import";
+                popup_close_button2.style.width = "100%";
+                popup_close_button2.style.height = "4%";
+                popup_close_button2.onclick = function() {
+                    document.getElementById("camera_popup_id").outerHTML = "";
+                    chatboxHide();
+                };
+                
+                
+                popup.appendChild(popup_p);
+                popup.appendChild(popup_textarea);
+                popup.appendChild(popup_close_button);
+                popup.appendChild(popup_close_button2);
+                document.body.appendChild(popup);
+                
+                
+                $("#chatBox").val('');
+                $("#chatBox").hide();
+                $("#chatWindow").css("bottom", "0");
+                $("#chatWindow").addClass("hide-scrollbar");
+                $("#camera_popup_textarea_id").focus()
+                
+                return;
+            }
+            
+            
             var cameraIndex = chatBoxInput.toLowerCase().indexOf("/camera");
             if (cameraIndex >= 0) {
                 
@@ -244,6 +393,8 @@ $(document).ready(function(){
                 
                 document.getElementById("chat").style.display = "none";
                 dew.command("Camera.Mode static");
+                
+                //$("#chatBox").val('');
                 
                 switch (mode) {
                     case "bicubic":
@@ -357,6 +508,7 @@ $(document).ready(function(){
                         
                         if (currentStep >= steps) {
                             clearInterval(cameraInterval);
+                            cameraInterval = undefined;
                             setTimeout(function() {
                                 dew.command("Camera.Mode first");
                                 document.getElementById("chat").style.display = "block";
@@ -577,6 +729,7 @@ $(document).ready(function(){
                         
                         if (performance.now() >= (startTime + durations[durations.length - 1])) {
                             clearInterval(cameraInterval);
+                            cameraInterval = undefined;
                             setTimeout(function() {
                                 dew.command("Camera.Mode first");
                                 document.getElementById("chat").style.display = "block";
