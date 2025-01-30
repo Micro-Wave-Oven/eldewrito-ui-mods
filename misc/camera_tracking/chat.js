@@ -50,6 +50,7 @@ $(document).ready(function(){
             var chatBoxInput = $("#chatBox").val();
             
             
+            
             // Auto Camera Tracking Commands
             
             var posIndex = Math.max(
@@ -105,8 +106,7 @@ $(document).ready(function(){
                         
                         midPos.push(tempPos);
                         
-                        dew.notify("chat", { message: "Added to mid positions:", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                        midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
+                        dew.notify("chat", { message: "Added: [" + tempPos.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     });
                 
                 
@@ -122,8 +122,8 @@ $(document).ready(function(){
                             dew.notify("chat", { message: "Incorrect id, do \"/midpos list\" to find the correct id", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                         
                         } else {
-                            midPos.splice(id_to_delete, 1);
-                            midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
+                            let removed = midPos.splice(id_to_delete, 1)[0];
+                            dew.notify("chat", { message: "Removed: [" + removed.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                         }
                     }
                 
@@ -181,18 +181,20 @@ $(document).ready(function(){
                 popup.id = "camera_popup_id";
                 popup.style.width = "700px";
                 popup.style.height = "500px";
-                popup.style.position = "absolute";
+                popup.style.padding = "10px";
+                popup.style.background = "#142850";
+                popup.style.borderRadius = "4px";
                 popup.style.position = "absolute";
                 popup.style.top = "50%";
                 popup.style.left = "50%";
                 popup.style.margin = "-250px 0 0 -350px";
                 
                 let popup_p = document.createElement("p");
-                popup_p.innerText = "Export: Copy/Paste only";
-                popup_p.style.color = "black";
-                popup_p.style.background = "white";
+                popup_p.innerText = "Export: Copy/Paste/CTRL + A only";
+                popup_p.style.color = "white";
+                popup_p.style.textAlign = "center";
                 popup_p.style.borderRadius = "4px";
-                popup_p.style.width = "100%";
+                popup_p.style.width = "calc(100% - 20px);"; //"100%";
                 popup_p.style.height = "4%";
                 
                 let popup_textarea = document.createElement("textarea");
@@ -238,25 +240,27 @@ $(document).ready(function(){
                 popup.id = "camera_popup_id";
                 popup.style.width = "700px";
                 popup.style.height = "500px";
-                popup.style.position = "absolute";
+                popup.style.padding = "10px";
+                popup.style.background = "#142850";
+                popup.style.borderRadius = "4px";
                 popup.style.position = "absolute";
                 popup.style.top = "50%";
                 popup.style.left = "50%";
                 popup.style.margin = "-250px 0 0 -350px";
                 
                 let popup_p = document.createElement("p");
-                popup_p.innerText = "Import: Copy/Paste only";
-                popup_p.style.color = "black";
-                popup_p.style.background = "white";
+                popup_p.innerText = "Import: Copy/Paste/CTRL + A only";
+                popup_p.style.color = "white";
+                popup_p.style.textAlign = "center";
                 popup_p.style.borderRadius = "4px";
-                popup_p.style.width = "100%";
+                popup_p.style.width = "calc(100% - 20px);"; //"100%";
                 popup_p.style.height = "4%";
                 
                 let popup_textarea = document.createElement("textarea");
                 popup_textarea.id = "camera_popup_textarea_id";
                 popup_textarea.value = data;
                 popup_textarea.style.width = "100%";
-                popup_textarea.style.height = "85%";
+                popup_textarea.style.height = "80%";
                 
                 let popup_close_button = document.createElement("button");
                 popup_close_button.textContent = "Close and Import";
@@ -327,10 +331,8 @@ $(document).ready(function(){
                     dew.notify("chat", { message: " Default mode is bicubic", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " /camera 10", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: " /camera dur 4 4 2", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " /camera <b/bi/bicubic> 10", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: " /camera <b/bi/bicubic> dur 4 4 2", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " /camera <l/lerp/linear> 10", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: " /camera <l/lerp/linear> dur 4 4 2", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
@@ -380,8 +382,7 @@ $(document).ready(function(){
                     dew.notify("chat", { message: "Incorrect number of durations, you have " + (1 + midPos.length) + " tracks and " + durations.length + " durations.", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     chatboxHide();
                     return;
-                }
-                
+                }                
                 
                 document.getElementById("chat").style.display = "none";
                 dew.command("Camera.Mode static");
@@ -404,6 +405,15 @@ $(document).ready(function(){
                 return;
             }
             
+            function camera_end() {
+                clearInterval(cameraInterval);
+                cameraInterval = undefined;
+                setTimeout(function() {
+                    dew.command("Camera.Mode default");
+                    document.getElementById("chat").style.display = "block";
+                    chatboxHide();
+                }, 5000);
+            }
             
             function lerp_camera(durations) {
                 
@@ -499,13 +509,7 @@ $(document).ready(function(){
                         currentStep++;
                         
                         if (currentStep >= steps) {
-                            clearInterval(cameraInterval);
-                            cameraInterval = undefined;
-                            setTimeout(function() {
-                                dew.command("Camera.Mode first");
-                                document.getElementById("chat").style.display = "block";
-                                chatboxHide();
-                            }, 1000);
+                            camera_end();
                         }
                         
                     }, cameraIntervalMs);
@@ -528,8 +532,7 @@ $(document).ready(function(){
                 // Durations will be the x axis values for each point in time
                 durations = durations.map(x => x * 1000);
                 durations.unshift(0);
-                durations = durations.map((elem, index) => durations.slice(0, index + 1).reduce((a, b) => a + b));
-                
+                durations = durations.map((elem, index) => durations.slice(0, index + 1).reduce((a, b) => a + b));                
                 
                 
                 // Source: https://github.com/chdh/commons-math-interpolation
@@ -729,24 +732,18 @@ $(document).ready(function(){
                     cameraInterval = setInterval(function() {
                         
                         // Compute camera position values
-                        let currTime = performance.now();
-                        let posX = xValInterpolator(currTime - startTime);
-                        let posY = yValInterpolator(currTime - startTime);
-                        let posZ = zValInterpolator(currTime - startTime);
-                        let posH = hValInterpolator(currTime - startTime);
-                        let posV = vValInterpolator(currTime - startTime);
+                        let currTime = performance.now() - startTime;                        
+                        let posX = xValInterpolator(currTime);
+                        let posY = yValInterpolator(currTime);
+                        let posZ = zValInterpolator(currTime);
+                        let posH = hValInterpolator(currTime);
+                        let posV = vValInterpolator(currTime);
                         
                         
                         dew.command("Camera.Position " + posX + " " + posY + " " + posZ + " " + posH + " " + posV);
                         
                         if (performance.now() >= (startTime + durations[durations.length - 1])) {
-                            clearInterval(cameraInterval);
-                            cameraInterval = undefined;
-                            setTimeout(function() {
-                                dew.command("Camera.Mode first");
-                                document.getElementById("chat").style.display = "block";
-                                chatboxHide();
-                            }, 1000);
+                            camera_end();
                         }
                         
                     }, cameraIntervalMs);
