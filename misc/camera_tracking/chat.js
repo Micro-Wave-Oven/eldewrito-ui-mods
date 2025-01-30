@@ -263,7 +263,7 @@ $(document).ready(function(){
                 popup_textarea.style.height = "80%";
                 
                 let popup_close_button = document.createElement("button");
-                popup_close_button.textContent = "Close and Import";
+                popup_close_button.textContent = "Import and Close";
                 popup_close_button.style.width = "100%";
                 popup_close_button.style.height = "4%";
                 popup_close_button.onclick = function(e) {
@@ -289,7 +289,7 @@ $(document).ready(function(){
                 };
                 
                 let popup_close_button2 = document.createElement("button");
-                popup_close_button2.textContent = "Close and Don't Import";
+                popup_close_button2.textContent = "Close without importing";
                 popup_close_button2.style.width = "100%";
                 popup_close_button2.style.height = "4%";
                 popup_close_button2.onclick = function() {
@@ -336,6 +336,8 @@ $(document).ready(function(){
                     
                     dew.notify("chat", { message: " /camera <l/lerp/linear> 10", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: " /camera <l/lerp/linear> dur 4 4 2", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    dew.notify("chat", { message: " /camera <p/pause> <10 | dur 1 ...>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     return;
                 }
                 
@@ -351,8 +353,14 @@ $(document).ready(function(){
                         
                     case "l":
                     case "lerp":
-                    case "":
+                    case "linear":
                         mode = "linear";
+                        curr_command.shift();
+                        break;
+                        
+                    case "p":
+                    case "pause":
+                        mode = "pause";
                         curr_command.shift();
                         break;
                     
@@ -396,6 +404,10 @@ $(document).ready(function(){
                     
                     case "linear":
                         lerp_camera(durations);
+                        break;
+                    
+                    case "pause":
+                        pause_camera(durations);
                         break;
                     
                     default:
@@ -751,6 +763,32 @@ $(document).ready(function(){
                 }, 1000);
                 
                 return;
+            }
+            
+            function pause_camera(durations) {
+                
+                durations = durations.map(n => n * 1000);
+                
+                var positions = [posA];
+                positions.push(...midPos);
+                positions.push(posB);
+                
+                function camera_step(currPos) {
+                    
+                    setTimeout(() => {
+                        dew.command("Camera.Position " + positions[currPos][0] + " " + positions[currPos][1] + " " + positions[currPos][2] + " " + positions[currPos][3] + " " + positions[currPos][4]);
+                        
+                        if (currPos < durations.length) {
+                            camera_step(currPos + 1);
+                        } else {
+                            camera_end();
+                        }
+                    }, durations[currPos]);
+                    
+                }                
+                
+                camera_step(0);
+                
             }
             
             
