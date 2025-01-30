@@ -81,7 +81,6 @@ $(document).ready(function(){
             if (posIndex >= 0) {
                 
                 var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 7).trim().replace(/  +/g, ' ').split(" ");
-                console.log(curr_command);
                 
                 // List points
                 if (curr_command[0] == "l" || curr_command[0] == "ls" || curr_command[0] == "list") {
@@ -178,20 +177,41 @@ $(document).ready(function(){
                     dew.notify("chat", { message: "Missing either start or end position", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     chatboxHide();
                     return;
+                }                
+                
+                // TODO: Improve jank
+                var customDurationsEnabled = (midPos.length != 0) && (chatBoxInput.substring(cameraIndex + 8).trim().split(" ")[0] == "dur");
+                var durations = [];
+                if (customDurationsEnabled) {
+                    durations = chatBoxInput.substring(cameraIndex + 8).trim().split(" ").splice(1).map(Number);
                 }
                 
-                dew.command("Camera.Mode static");
+                if (customDurationsEnabled && durations.length != (1 + midPos.length)) {
+                    dew.notify("chat", { message: "Incorrect number of durations, you have " + (1 + midPos.length) + "tracks and " + durations.length + " durations.", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    chatboxHide();
+                    return;
+                }
                 
-                var timeValue = parseFloat(chatBoxInput.substring(cameraIndex + 8));
+                
+                var timeValue = customDurationsEnabled ? durations.reduce((a, b) => a + b, 0) : parseFloat(chatBoxInput.substring(cameraIndex + 8));
                 var timeInMs = timeValue * 1000;
                 var nbTracks = 1 + midPos.length;
                 var steps = parseInt(timeInMs / cameraIntervalMs);
-                steps = steps + (nbTracks - (steps % nbTracks)) - nbTracks + 1;
+                steps = steps + (nbTracks - (steps % nbTracks)) - nbTracks;
                 var trackSize = Math.floor(steps / nbTracks);
+                
+                var trackSizes = []
+                if (customDurationsEnabled) {
+                    trackSizes = durations.map(x => x * 1000).map(x => x / cameraIntervalMs);
+                    trackSizes = trackSizes.map((elem, index) => trackSizes.slice(0,index + 1).reduce((a, b) => a + b));
+                    durations = durations.map(x => x * 1000);
+                }
                 
                 
                 currentStep = 0;
                 document.getElementById("chat").style.display = "none";
+                
+                dew.command("Camera.Mode static");
                 
                 var prevTrack = 0;
                 var tempPosA = undefined;
@@ -207,7 +227,7 @@ $(document).ready(function(){
                 }
                 
                 // Fix potential rotation wrap issue
-                if (Math.abs(tempPosA[3] - tempPosB[3]) > Math.PI) {                    
+                if (Math.abs(tempPosA[3] - tempPosB[3]) > Math.PI) {
                     if (tempPosA[3] > tempPosB[3]) {
                         tempPosB[3] += (2 * Math.PI);
                     } else {
@@ -221,7 +241,13 @@ $(document).ready(function(){
                     
                     var cameraInterval = setInterval(function() {
                         
-                        var currTrack = Math.min(parseInt(currentStep / trackSize), nbTracks - 1);
+                        var currTrack = 0;
+                        
+                        if (!customDurationsEnabled) {
+                            currTrack = Math.min(parseInt(currentStep / trackSize), nbTracks - 1);
+                        } else {
+                            currTrack = trackSizes.findIndex((v, i) => currentStep <= v);
+                        }
                         
                         if (currTrack != prevTrack) {
                             
@@ -256,7 +282,11 @@ $(document).ready(function(){
                         if (nbTracks == 1) {
                             progress = (performance.now() - startTime) / timeInMs;
                         } else {
-                            progress = (performance.now() - startTime) / (timeInMs / nbTracks);
+                            if (!customDurationsEnabled) {
+                                progress = (performance.now() - startTime) / (timeInMs / nbTracks);
+                            } else {
+                                progress = (performance.now() - startTime) / durations[currTrack];
+                            }
                         }
                         
                         var posX = progress * (tempPosB[0] - tempPosA[0]) + tempPosA[0];
