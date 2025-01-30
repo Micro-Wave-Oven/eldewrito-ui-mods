@@ -177,27 +177,92 @@ $(document).ready(function(){
                     dew.notify("chat", { message: "Missing either start or end position", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     chatboxHide();
                     return;
-                }                
+                }
+                
+                var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 8).trim().replace(/  +/g, ' ').split(" ");
+                
+                if (curr_command.length == 0 || curr_command[0].length == 0) {
+                    dew.notify("chat", { message: "Camera Help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " Default mode is bicubic", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    dew.notify("chat", { message: " /camera 10", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " /camera dur 4 4 2", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    dew.notify("chat", { message: " /camera <b/bi/bicubic> 10", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " /camera <b/bi/bicubic> dur 4 4 2", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    dew.notify("chat", { message: " /camera <l/lerp/linear> 10", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " /camera <l/lerp/linear> dur 4 4 2", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    return;
+                }
+                
+                var mode = "bicubic"; //default mode
+                switch (curr_command[0]) {
+                    
+                    case "b":
+                    case "bi":
+                    case "bicubic":
+                        mode = "bicubic";
+                        curr_command.shift();
+                        break;
+                        
+                    case "l":
+                    case "lerp":
+                    case "":
+                        mode = "linear";
+                        curr_command.shift();
+                        break;
+                    
+                    default:
+                        mode = "bicubic";
+                }
+                
                 
                 var durations = [];
-                var customDurationsEnabled = (midPos.length != 0) && (chatBoxInput.substring(cameraIndex + 8).trim().split(" ")[0] == "dur");
+                var customDurationsEnabled = (midPos.length != 0) && (curr_command[0] == "dur");
+                
+                if (!customDurationsEnabled && (isNaN(curr_command[0]) || !isFinite(curr_command[0])) ) {
+                    dew.notify("chat", { message: "Duration needs to be a number", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                }
                 
                 if (customDurationsEnabled) {
-                    durations = chatBoxInput.substring(cameraIndex + 8).trim().split(" ").splice(1).map(Number);
+                    durations = curr_command.splice(1).map(Number);
                     
                 } else {
-                    let per_track_dur = parseFloat(chatBoxInput.substring(cameraIndex + 8)) / (1 + midPos.length);
+                    let per_track_dur = parseFloat(curr_command[0]) / (1 + midPos.length);
                     for (let i = 0; i < (1 + midPos.length); i++) {
                         durations.push(per_track_dur);
                     }
                 }
                 
-                
                 if (durations.length == 0 || durations.length != (1 + midPos.length)) {
-                    dew.notify("chat", { message: "Incorrect number of durations, you have " + (1 + midPos.length) + "tracks and " + durations.length + " durations.", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "Incorrect number of durations, you have " + (1 + midPos.length) + " tracks and " + durations.length + " durations.", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     chatboxHide();
                     return;
                 }
+                
+                
+                document.getElementById("chat").style.display = "none";
+                dew.command("Camera.Mode static");
+                
+                switch (mode) {
+                    case "bicubic":
+                        bicubic_camera(durations);
+                        break;
+                    
+                    case "linear":
+                        lerp_camera(durations);
+                        break;
+                    
+                    default:
+                        dew.notify("chat", { message: "Undefined mode somehow.", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                }
+                
+                return;
+            }
+            
+            
+            function lerp_camera(durations) {
                 
                 
                 var timeValue = durations.reduce((a, b) => a + b, 0);
@@ -215,9 +280,6 @@ $(document).ready(function(){
                 
                 
                 currentStep = 0;
-                document.getElementById("chat").style.display = "none";
-                
-                dew.command("Camera.Mode static");
                 
                 var prevTrack = 0;
                 var tempPosA = undefined;
@@ -306,6 +368,226 @@ $(document).ready(function(){
                     
                 }, 1000);
                   
+                return;
+            }
+            
+            function bicubic_camera(durations) {
+                
+                
+                var timeValue = durations.reduce((a, b) => a + b, 0);
+                var timeInMs = timeValue * 1000;
+                var nbTracks = 1 + midPos.length;
+                
+                var steps = parseInt(timeInMs / cameraIntervalMs);
+                steps = steps + (nbTracks - (steps % nbTracks)) - nbTracks;
+
+                // Durations will be the x axis values for each point in time
+                durations = durations.map(x => x * 1000);
+                durations.unshift(0);
+                durations = durations.map((elem, index) => durations.slice(0, index + 1).reduce((a, b) => a + b));
+                
+                
+                
+                // Source: https://github.com/chdh/commons-math-interpolation
+                function binarySearch(a, key) {
+                    let low = 0;
+                    let high = a.length - 1;
+                    while (low <= high) {
+                        const mid = (low + high) >>> 1;
+                        const midVal = a[mid];
+                        if (midVal < key) {
+                            low = mid + 1;
+                        } else if (midVal > key) {
+                            high = mid - 1;
+                        } else if (midVal == key) {
+                            return mid;
+                        } else {
+                            console.log("Invalid number encountered in binary search.");
+                        }
+                    }
+                    return -(low + 1);
+                }
+
+                function evaluatePoly(c, x) {
+                    const n = c.length;
+                    if (n == 0) {
+                        return 0;
+                    }
+                    let v = c[n - 1];
+                    for (let i = n - 2; i >= 0; i--) {
+                        v = x * v + c[i];
+                    }
+                    return v;
+                }
+                
+                function evaluatePolySegment(xVals, segmentCoeffs, x) {
+                    let i = binarySearch(xVals, x);
+                    if (i < 0) {
+                        i = -i - 2;
+                    }
+                    i = Math.max(0, Math.min(i, segmentCoeffs.length - 1));
+                    return evaluatePoly(segmentCoeffs[i], x - xVals[i]);
+                }
+
+                function trimPoly(c) {
+                    let n = c.length;
+                    while (n > 1 && c[n - 1] == 0) {
+                        n--;
+                    }
+                    return (n == c.length) ? c : c.subarray(0, n);
+                }
+                                
+                function computeCubicPolyCoefficients(xVals, yVals) {
+                    if (xVals.length != yVals.length) {
+                        console.log("Dimension mismatch.");
+                    }
+                    if (xVals.length < 3) {
+                        console.log("Number of points is too small.");
+                    }
+                    const n = xVals.length - 1;
+                    
+                    const h = new Float64Array(n);
+                    for (let i = 0; i < n; i++) {
+                        h[i] = xVals[i + 1] - xVals[i];
+                    }
+                    
+                    const mu = new Float64Array(n);
+                    const z = new Float64Array(n + 1);
+                    mu[0] = 0;
+                    z[0] = 0;
+                    for (let i = 1; i < n; i++) {
+                        const g = 2 * (xVals[i + 1] - xVals[i - 1]) - h[i - 1] * mu[i - 1];
+                        mu[i] = h[i] / g;
+                        z[i] = (3 * (yVals[i + 1] * h[i - 1] - yVals[i] * (xVals[i + 1] - xVals[i - 1]) + yVals[i - 1] * h[i]) / (h[i - 1] * h[i]) - h[i - 1] * z[i - 1]) / g;
+                    }
+                    
+                    // cubic spline coefficients. b is linear, c quadratic, d is cubic
+                    const b = new Float64Array(n);
+                    const c = new Float64Array(n + 1);
+                    const d = new Float64Array(n);
+                    
+                    z[n] = 0;
+                    c[n] = 0;
+                    
+                    for (let i = n - 1; i >= 0; i--) {
+                        const dx = h[i];
+                        const dy = yVals[i + 1] - yVals[i];
+                        c[i] = z[i] - mu[i] * c[i + 1];
+                        b[i] = dy / dx - dx * (c[i + 1] + 2 * c[i]) / 3;
+                        d[i] = (c[i + 1] - c[i]) / (3 * dx);
+                    }
+                    
+                    const segmentCoeffs = new Array(n);
+                    for (let i = 0; i < n; i++) {
+                        const coeffs = new Float64Array(4);
+                        coeffs[0] = yVals[i];
+                        coeffs[1] = b[i];
+                        coeffs[2] = c[i];
+                        coeffs[3] = d[i];
+                        segmentCoeffs[i] = trimPoly(coeffs);
+                    }
+                    return segmentCoeffs;
+                }
+                
+                function createCubicSplineInterpolator(xVals, yVals) {
+                    const segmentCoeffs = computeCubicPolyCoefficients(xVals, yVals);
+                    const xValsCopy = Float64Array.from(xVals);
+                    return (x) => evaluatePolySegment(xValsCopy, segmentCoeffs, x);
+                }
+                
+                
+                let xPosVals = [posA[0]];
+                let yPosVals = [posA[1]];
+                let zPosVals = [posA[2]];
+                let hPosVals = [posA[3]];
+                let vPosVals = [posA[4]];
+                
+                for (let i = 0; i < midPos.length; i++) {
+                    xPosVals.push(midPos[i][0]);
+                    yPosVals.push(midPos[i][1]);
+                    zPosVals.push(midPos[i][2]);
+                    hPosVals.push(midPos[i][3]);
+                    vPosVals.push(midPos[i][4]);
+                }
+                
+                
+                // TODO: Jank fix, Cubic Interpolator needs at least 3 values, if only 2, use linear
+                if (midPos.length == 0) {
+                    durations.splice(1, 0, (durations[1] - durations[0]) / 2 + durations[0])
+                    xPosVals.push((posB[0] - posA[0]) / 2 + posA[0]);
+                    yPosVals.push((posB[1] - posA[1]) / 2 + posA[1]);
+                    zPosVals.push((posB[2] - posA[2]) / 2 + posA[2]);
+                    
+                    // Fix rotation wrap issue
+                    if (Math.abs(posB[3] - posA[3]) < Math.PI) {
+                        hPosVals.push((posB[3] - posA[3]) / 2 + posA[3]);
+                    
+                    } else {
+                        if (posA[3] > posB[3]) {
+                            posB[3] += (2 * Math.PI);
+                        } else {
+                            posA[3] += (2 * Math.PI);
+                        }
+                    }
+                    
+                    vPosVals.push((posB[4] - posA[4]) / 2 + posA[4]);
+                }
+                
+                
+                xPosVals.push(posB[0]);
+                yPosVals.push(posB[1]);
+                zPosVals.push(posB[2]);
+                hPosVals.push(posB[3]);
+                vPosVals.push(posB[4]);
+                
+                
+                // Fix rotation wrap issue                
+                for (let i = 1; i < hPosVals.length; i++) {
+                    if ((hPosVals[i - 1] - hPosVals[i]) > Math.PI) {
+                        let diff = hPosVals[i - 1] - hPosVals[i];                        
+                        let amnt = parseInt(diff / (2 * Math.PI)) + 1;
+                        hPosVals[i] += amnt * 2 * Math.PI;
+                    }
+                }
+                
+                // Create interpolators
+                var xValInterpolator = createCubicSplineInterpolator(durations, xPosVals);
+                var yValInterpolator = createCubicSplineInterpolator(durations, yPosVals);
+                var zValInterpolator = createCubicSplineInterpolator(durations, zPosVals);
+                var hValInterpolator = createCubicSplineInterpolator(durations, hPosVals);
+                var vValInterpolator = createCubicSplineInterpolator(durations, vPosVals);
+                
+                
+                setTimeout(function() {
+                
+                    var startTime = performance.now();
+                
+                    var cameraInterval = setInterval(function() {
+                        
+                        // Compute camera position values
+                        let currTime = performance.now();
+                        let posX = xValInterpolator(currTime - startTime);
+                        let posY = yValInterpolator(currTime - startTime);
+                        let posZ = zValInterpolator(currTime - startTime);
+                        let posH = hValInterpolator(currTime - startTime);
+                        let posV = vValInterpolator(currTime - startTime);
+                        
+                        
+                        dew.command("Camera.Position " + posX + " " + posY + " " + posZ + " " + posH + " " + posV);
+                        
+                        if (performance.now() >= (startTime + durations[durations.length - 1])) {
+                            clearInterval(cameraInterval);
+                            setTimeout(function() {
+                                dew.command("Camera.Mode first");
+                                document.getElementById("chat").style.display = "block";
+                                chatboxHide();
+                            }, 1000);
+                        }
+                        
+                    }, cameraIntervalMs);
+                    
+                }, 1000);
+                
                 return;
             }
             
