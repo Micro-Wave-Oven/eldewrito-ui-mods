@@ -50,21 +50,7 @@ $(document).ready(function(){
             var chatBoxInput = $("#chatBox").val();
             
             
-            
             // Auto Camera Tracking Commands
-            
-            /*
-            // Open chat to cancel current animation
-            // TODO: Make it work
-            if (cameraInterval != undefined) {
-                clearInterval(cameraInterval);
-                cameraInterval = undefined;
-                dew.command("Camera.Mode first");
-                document.getElementById("chat").style.display = "block";
-                chatboxHide();
-                dew.notify("chat", { message: "Animation cancelled", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-            }
-            */
             
             var posIndex = Math.max(
                 chatBoxInput.toLowerCase().indexOf("/posa"),
@@ -97,7 +83,7 @@ $(document).ready(function(){
                 // List points
                 if (curr_command[0] == "l" || curr_command[0] == "ls" || curr_command[0] == "list") {
                     dew.notify("chat", { message: "Mid positions: ", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                    midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
+                    midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
                 
                 
                 // Clear points
@@ -120,7 +106,7 @@ $(document).ready(function(){
                         midPos.push(tempPos);
                         
                         dew.notify("chat", { message: "Added to mid positions:", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                        midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
+                        midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
                     });
                 
                 
@@ -137,7 +123,7 @@ $(document).ready(function(){
                         
                         } else {
                             midPos.splice(id_to_delete, 1);
-                            midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
+                            midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" }));
                         }
                     }
                 
@@ -464,7 +450,7 @@ $(document).ready(function(){
                 
                     var startTime = performance.now();
                     
-                    var cameraInterval = setInterval(function() {
+                    cameraInterval = setInterval(function() {
                         
                         var currTrack = trackSizes.findIndex((v, i) => currentStep <= v);
                         if (currTrack == -1) {
@@ -726,7 +712,7 @@ $(document).ready(function(){
                 
                     var startTime = performance.now();
                 
-                    var cameraInterval = setInterval(function() {
+                    cameraInterval = setInterval(function() {
                         
                         // Compute camera position values
                         let currTime = performance.now();
@@ -783,6 +769,18 @@ $(document).ready(function(){
     
     $("html").on("keydown", function(e){ //disable tabbing
         if(e.keyCode == 9){ //tab
+            e.preventDefault();
+        }
+    });
+    
+    $("html").on("keydown", function(e){ //Cancel animation if playing
+        if(e.keyCode == 27 && cameraInterval != undefined){ //ESC
+            clearInterval(cameraInterval);
+            cameraInterval = undefined;
+            dew.command("Camera.Mode first");
+            document.getElementById("chat").style.display = "block";
+            chatboxHide();
+            dew.notify("chat", { message: "Animation cancelled", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
             e.preventDefault();
         }
     });
