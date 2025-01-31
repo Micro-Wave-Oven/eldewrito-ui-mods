@@ -49,6 +49,9 @@ $(document).ready(function(){
         
             var chatBoxInput = $("#chatBox").val();
             
+            if (cameraInterval != undefined) {
+                return;
+            }            
             
             
             // Auto Camera Tracking Commands
@@ -176,12 +179,13 @@ $(document).ready(function(){
             if (helpIndex >= 0) {
                 dew.notify("chat", { message: "To set the start point, do \"/startPos\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: "To set the end point, do \"/endPos\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                
                 dew.notify("chat", { message: "To add/delete/list/edit intermediary points, do \"/midPoints\" for the help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                
                 dew.notify("chat", { message: "For camera/player help, do /camera", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                
+                dew.notify("chat", { message: "To cancel the animation, press Escape", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: "To export/import the current points, do \"/import\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                
+                chatboxHide();
+                return;
             }
             
             
@@ -335,12 +339,6 @@ $(document).ready(function(){
             var cameraIndex = chatBoxInput.toLowerCase().indexOf("/camera");
             if (cameraIndex >= 0) {
                 
-                if ( posA == undefined || posB == undefined ) {
-                    dew.notify("chat", { message: "Missing either start or end position", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                    chatboxHide();
-                    return;
-                }
-                
                 var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 8).trim().replace(/  +/g, ' ').split(" ");
                 
                 if (curr_command.length == 0 || curr_command[0].length == 0) {
@@ -355,6 +353,13 @@ $(document).ready(function(){
                     dew.notify("chat", { message: " /camera <l/lerp/linear> dur 4 4 2", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " /camera <p/pause> <10 | dur 1 ...>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    chatboxHide();
+                    return;
+                }
+                
+                if ( posA == undefined || posB == undefined ) {
+                    dew.notify("chat", { message: "Missing either start or end position", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    chatboxHide();
                     return;
                 }
                 
@@ -391,6 +396,8 @@ $(document).ready(function(){
                 
                 if (!customDurationsEnabled && (isNaN(curr_command[0]) || !isFinite(curr_command[0])) ) {
                     dew.notify("chat", { message: "Duration needs to be a number", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    chatboxHide();
+                    return;
                 }
                 
                 if (customDurationsEnabled) {
@@ -429,6 +436,8 @@ $(document).ready(function(){
                     
                     default:
                         dew.notify("chat", { message: "Undefined mode somehow.", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                        chatboxHide();
+                        break;
                 }
                 
                 return;
