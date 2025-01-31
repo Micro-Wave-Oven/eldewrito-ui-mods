@@ -39,16 +39,69 @@ var pauseStartTime = 0;
 var animationPaused = false;
 var pauseStartTime = 0;
 
+var dataWindowOpen = false;
 
 $(document).ready(function(){
     $(document).keyup(function (e) {
         if (e.keyCode === 27) {
+            
+            if (cameraInterval != undefined) {
+                
+                clearInterval(cameraInterval);
+                cameraInterval = undefined;
+                dew.command("Camera.Mode first");
+                document.getElementById("chat").style.display = "block";
+                
+                chatboxHide();
+                
+                dew.notify("chat", { message: "Animation cancelled", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                
+                e.preventDefault();
+                return;
+            }
+            
+            if (dataWindowOpen) {
+                
+                document.getElementById("popup_close_button2").click();
+                
+                e.preventDefault();
+                return;
+            }
+            
             chatboxHide();
         }
+        
+        $("html").on("keydown", function(e){ //Pause animation if playing
+            if(e.keyCode == 80 && cameraInterval != undefined){ //ESC
+            
+                animationPaused = !animationPaused;
+                
+                if (animationPaused) {
+                    pauseStartTime = performance.now();
+                } else {
+                    startTime += (performance.now() - pauseStartTime);
+                }
+                
+                /*
+                if (!animationPaused) {
+                    dew.command("Game.PlayUiSound 13");
+                    setTimeout(() => {
+                        dew.command("Game.PlayUiSound 13");
+                    }, 200);
+                } else {
+                    dew.command("Game.PlayUiSound 14");
+                }
+                */
+                
+                e.preventDefault();
+            }
+        });
+        
         if (e.keyCode == 44) {
             dew.command('Game.TakeScreenshot');  
         }
     });
+    
     $(document).keydown(function(e){
         if (e.keyCode === 13){ //Enter
         
@@ -195,8 +248,20 @@ $(document).ready(function(){
             }
             
             
-            var dataIndex = chatBoxInput.toLowerCase().indexOf("/export");
+            var dataIndex = Math.max(
+                chatBoxInput.toLowerCase().indexOf("/import"),
+                chatBoxInput.toLowerCase().indexOf("/export")
+            );
             if (dataIndex >= 0) {
+                
+                if (dataWindowOpen) {
+                    $("#chatBox").val('');
+                    $("#chatBox").hide();
+                    $("#chatWindow").css("bottom", "0");
+                    $("#chatWindow").addClass("hide-scrollbar");
+                    return;
+                }                    
+                
                 var data = {
                     start: posA,
                     midPoints: midPos,
@@ -217,66 +282,7 @@ $(document).ready(function(){
                 popup.style.margin = "-250px 0 0 -350px";
                 
                 let popup_p = document.createElement("p");
-                popup_p.innerText = "Export: Copy/Paste/CTRL + A only";
-                popup_p.style.color = "white";
-                popup_p.style.textAlign = "center";
-                popup_p.style.borderRadius = "4px";
-                popup_p.style.width = "calc(100% - 20px);"; //"100%";
-                popup_p.style.height = "4%";
-                
-                let popup_textarea = document.createElement("textarea");
-                popup_textarea.id = "camera_popup_textarea_id";
-                popup_textarea.value = data;
-                popup_textarea.style.width = "100%";
-                popup_textarea.style.height = "85%";
-                
-                let popup_close_button = document.createElement("button");
-                popup_close_button.textContent = "Close";
-                popup_close_button.style.width = "100%";
-                popup_close_button.style.height = "4%";
-                popup_close_button.onclick = function() {
-                    document.getElementById("camera_popup_id").outerHTML = "";
-                    chatboxHide();
-                };
-                
-                popup.appendChild(popup_p);
-                popup.appendChild(popup_textarea);
-                popup.appendChild(popup_close_button);
-                document.body.appendChild(popup);
-                
-                $("#chatBox").val('');
-                $("#chatBox").hide();
-                $("#chatWindow").css("bottom", "0");
-                $("#chatWindow").addClass("hide-scrollbar");
-                $("#camera_popup_textarea_id").focus()
-                
-                return;
-            }
-            
-            
-            var dataIndex = chatBoxInput.toLowerCase().indexOf("/import");
-            if (dataIndex >= 0) {
-                var data = {
-                    start: posA,
-                    midPoints: midPos,
-                    end: posB
-                };
-                data = JSON.stringify(data, null, 4);
-                
-                let popup = document.createElement("div");
-                popup.id = "camera_popup_id";
-                popup.style.width = "700px";
-                popup.style.height = "500px";
-                popup.style.padding = "10px";
-                popup.style.background = "#142850";
-                popup.style.borderRadius = "4px";
-                popup.style.position = "absolute";
-                popup.style.top = "50%";
-                popup.style.left = "50%";
-                popup.style.margin = "-250px 0 0 -350px";
-                
-                let popup_p = document.createElement("p");
-                popup_p.innerText = "Import: Copy/Paste/CTRL + A only";
+                popup_p.innerText = "Import/Export: Copy/Paste/CTRL + A only";
                 popup_p.style.color = "white";
                 popup_p.style.textAlign = "center";
                 popup_p.style.borderRadius = "4px";
@@ -310,16 +316,18 @@ $(document).ready(function(){
                         dew.notify("chat", { message: "Error parsing data: " + e.toString(), sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     }
                     
-                    
+                    dataWindowOpen = false;
                     document.getElementById("camera_popup_id").outerHTML = "";
                     chatboxHide();
                 };
                 
                 let popup_close_button2 = document.createElement("button");
+                popup_close_button2.id = "popup_close_button2";
                 popup_close_button2.textContent = "Close without importing";
                 popup_close_button2.style.width = "100%";
                 popup_close_button2.style.height = "4%";
                 popup_close_button2.onclick = function() {
+                    dataWindowOpen = false;
                     document.getElementById("camera_popup_id").outerHTML = "";
                     chatboxHide();
                 };
@@ -331,6 +339,7 @@ $(document).ready(function(){
                 popup.appendChild(popup_close_button2);
                 document.body.appendChild(popup);
                 
+                dataWindowOpen = true;
                 
                 $("#chatBox").val('');
                 $("#chatBox").hide();
@@ -866,44 +875,6 @@ $(document).ready(function(){
     
     $("html").on("keydown", function(e){ //disable tabbing
         if(e.keyCode == 9){ //tab
-            e.preventDefault();
-        }
-    });
-    
-    $("html").on("keydown", function(e){ //Cancel animation if playing
-        if(e.keyCode == 27 && cameraInterval != undefined){ //ESC
-            clearInterval(cameraInterval);
-            cameraInterval = undefined;
-            dew.command("Camera.Mode first");
-            document.getElementById("chat").style.display = "block";
-            chatboxHide();
-            dew.notify("chat", { message: "Animation cancelled", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-            e.preventDefault();
-        }
-    });
-    
-    $("html").on("keydown", function(e){ //Pause animation if playing
-        if(e.keyCode == 80 && cameraInterval != undefined){ //ESC
-        
-            animationPaused = !animationPaused;
-            
-            if (animationPaused) {
-                pauseStartTime = performance.now();
-            } else {
-                startTime += (performance.now() - pauseStartTime);
-            }
-            
-            /*
-            if (!animationPaused) {
-                dew.command("Game.PlayUiSound 13");
-                setTimeout(() => {
-                    dew.command("Game.PlayUiSound 13");
-                }, 200);
-            } else {
-                dew.command("Game.PlayUiSound 14");
-            }
-            */
-            
             e.preventDefault();
         }
     });
