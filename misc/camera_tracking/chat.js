@@ -34,10 +34,11 @@ var midPos = [];
 var currentStep = 0;
 var cameraIntervalMs = 5;
 var cameraInterval = undefined;
-var pauseStartTime = 0;
+var startTime = 0;
 
 var animationPaused = false;
 var pauseStartTime = 0;
+var loopCamera = false;
 
 var dataWindowOpen = false;
 
@@ -452,7 +453,9 @@ $(document).ready(function(){
                     dew.notify("chat", { message: "Incorrect number of durations, you have " + (1 + midPos.length) + " tracks and " + durations.length + " durations.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     chatboxHide();
                     return;
-                }                
+                }
+                
+                loopCamera = curr_command[curr_command.length - 1] == "l" || curr_command[curr_command.length - 1] == "loop";
                 
                 document.getElementById("chat").style.display = "none";
                 dew.command("Camera.Mode static");
@@ -467,12 +470,12 @@ $(document).ready(function(){
                 switch (mode) {
                     case "bicubic":
                         vals = prep_values_bicubic_akima(durations, mode);
-                        bicubic_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
+                        bicubic_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
                         break;
                         
                     case "akima":
                         vals = prep_values_bicubic_akima(durations, mode);
-                        akima_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
+                        akima_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
                         break;
                     
                     case "linear":
@@ -480,7 +483,7 @@ $(document).ready(function(){
                         break;
                     
                     case "pause":
-                        step_camera(durations);
+                        step_camera(durations, loopCamera);
                         break;
                     
                     default:
@@ -495,6 +498,7 @@ $(document).ready(function(){
             function camera_end() {
                 clearInterval(cameraInterval);
                 cameraInterval = undefined;
+                loopCamera = false;
                 setTimeout(function() {
                     dew.command("Camera.Mode default");
                     document.getElementById("chat").style.display = "block";
@@ -600,7 +604,11 @@ $(document).ready(function(){
                         currentStep++;
                         
                         if (currentStep >= steps) {
-                            camera_end();
+                            if (!loopCamera) {
+                                camera_end();
+                            } else {
+                                startTime = performance.now();
+                            }
                         }
                         
                     }, cameraIntervalMs);
@@ -919,7 +927,7 @@ $(document).ready(function(){
             }
             
 
-            function bicubic_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals) {
+            function bicubic_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals, loopCamera) {
                 
                 // Create interpolators
                 var xValInterpolator = createCubicSplineInterpolator(durations, xPosVals);
@@ -946,11 +954,14 @@ $(document).ready(function(){
                         let posH = hValInterpolator(currTime);
                         let posV = vValInterpolator(currTime);
                         
-                        
                         dew.command("Camera.Position " + posX + " " + posY + " " + posZ + " " + posH + " " + posV);
                         
                         if (performance.now() >= (startTime + durations[durations.length - 1])) {
-                            camera_end();
+                            if (!loopCamera) {
+                                camera_end();
+                            } else {
+                                startTime = performance.now();
+                            }
                         }
                         
                     }, cameraIntervalMs);
@@ -960,7 +971,7 @@ $(document).ready(function(){
                 return;
             }
 
-            function akima_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals) {
+            function akima_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals, loopCamera) {
                 
                 // Create interpolators
                 var xValInterpolator = createAkimaSplineInterpolator(durations, xPosVals);
@@ -987,11 +998,14 @@ $(document).ready(function(){
                         let posH = hValInterpolator(currTime);
                         let posV = vValInterpolator(currTime);
                         
-                        
                         dew.command("Camera.Position " + posX + " " + posY + " " + posZ + " " + posH + " " + posV);
                         
                         if (performance.now() >= (startTime + durations[durations.length - 1])) {
-                            camera_end();
+                            if (!loopCamera) {
+                                camera_end();
+                            } else {
+                                startTime = performance.now();
+                            }
                         }
                         
                     }, cameraIntervalMs);
@@ -1004,29 +1018,38 @@ $(document).ready(function(){
             }
 
             
-            function step_camera(durations) {
+            function step_camera(durations, loopCamera) {
                 
                 durations = durations.map(n => n * 1000 * durations.length);
                 
                 var positions = [posA];
                 positions.push(...midPos);
-                positions.push(posB);
+                
+                if (!loopCamera) {
+                    durations.push(durations[0]);
+                    positions.push(posB);
+                }
                 
                 cameraInterval = true;
                 
                 function camera_step(currPos) {
                     
+                    if (loopCamera) {
+                        currPos %= (durations.length);
+                    }
+                    
                     setTimeout(() => {
                         dew.command("Camera.Position " + positions[currPos][0] + " " + positions[currPos][1] + " " + positions[currPos][2] + " " + positions[currPos][3] + " " + positions[currPos][4]);
                         
-                        if (cameraInterval && currPos < durations.length) {
+                        if (!loopCamera && cameraInterval && currPos < (durations.length - 1)) {
+                            camera_step(currPos + ((!animationPaused) ? 1 : 0));
+                        } else if (loopCamera && cameraInterval && currPos < durations.length) {
                             camera_step(currPos + ((!animationPaused) ? 1 : 0));
                         } else {
                             camera_end();
                         }
                     }, durations[currPos]);
-                    
-                }                
+                }
                 
                 camera_step(0);
                 return;
