@@ -157,7 +157,7 @@ $(document).ready(function(){
                 
                 // Display help
                 } else {
-                    dew.notify("chat", { message: "Middle/Intermediary points help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "Middle/Intermediary points help:", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: " Add point: /midpos a <OPTIONAL NAME>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: " List points: /midpos l", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: " Move point: /midpos mv <from> <to>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
@@ -183,10 +183,10 @@ $(document).ready(function(){
                 chatBoxInput.toLowerCase().indexOf("/?")
             );
             if (helpIndex >= 0) {
-                dew.notify("chat", { message: "Camera Tracking Help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: "Camera Tracking Help:", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To set the start point, do \"/startPos\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To set the end point, do \"/endPos\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                dew.notify("chat", { message: " To add/delete/list/edit intermediary points, do \"/midPoints\" for the help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " To add/delete/list/edit intermediary points, do \"/midPos\" for the help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " For camera/player help, do /camera", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To export/import the current points, do \"/import\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 
@@ -348,7 +348,7 @@ $(document).ready(function(){
                 var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 8).trim().replace(/  +/g, ' ').split(" ");
                 
                 if (curr_command.length == 0 || curr_command[0].length == 0) {
-                    dew.notify("chat", { message: "Camera Help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "Camera Help:", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " To pause the animation, press P", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: " To cancel the animation, press Escape", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
