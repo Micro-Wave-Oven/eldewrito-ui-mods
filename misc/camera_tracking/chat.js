@@ -30,9 +30,14 @@ var cachedPlayerJSON;
 var posA = undefined;
 var posB = undefined;
 var midPos = [];
+
 var currentStep = 0;
 var cameraIntervalMs = 5;
 var cameraInterval = undefined;
+var pauseStartTime = 0;
+
+var animationPaused = false;
+var pauseStartTime = 0;
 
 
 $(document).ready(function(){
@@ -152,11 +157,12 @@ $(document).ready(function(){
                 
                 // Display help
                 } else {
-                    dew.notify("chat", { message: "Add point: /midpos a <OPTIONAL NAME>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: "List points: /midpos l", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: "Move point: /midpos mv <from> <to>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: "Delete point: /midpos del <index>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: "Clear points: /midpos c", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "Middle/Intermediary points help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " Add point: /midpos a <OPTIONAL NAME>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " List points: /midpos l", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " Move point: /midpos mv <from> <to>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " Delete point: /midpos del <index>", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " Clear points: /midpos c", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 }
                 
                 chatboxHide();
@@ -177,12 +183,12 @@ $(document).ready(function(){
                 chatBoxInput.toLowerCase().indexOf("/?")
             );
             if (helpIndex >= 0) {
-                dew.notify("chat", { message: "To set the start point, do \"/startPos\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                dew.notify("chat", { message: "To set the end point, do \"/endPos\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                dew.notify("chat", { message: "To add/delete/list/edit intermediary points, do \"/midPoints\" for the help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                dew.notify("chat", { message: "For camera/player help, do /camera", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                dew.notify("chat", { message: "To cancel the animation, press Escape", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
-                dew.notify("chat", { message: "To export/import the current points, do \"/import\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: "Camera Tracking Help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " To set the start point, do \"/startPos\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " To set the end point, do \"/endPos\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " To add/delete/list/edit intermediary points, do \"/midPoints\" for the help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " For camera/player help, do /camera", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " To export/import the current points, do \"/import\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                 
                 chatboxHide();
                 return;
@@ -343,6 +349,9 @@ $(document).ready(function(){
                 
                 if (curr_command.length == 0 || curr_command[0].length == 0) {
                     dew.notify("chat", { message: "Camera Help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    dew.notify("chat", { message: " To pause the animation, press P", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " To cancel the animation, press Escape", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: " Default mode is bicubic", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " /camera 10", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
@@ -421,6 +430,9 @@ $(document).ready(function(){
                 
                 $("#chatBox").val('');
                 
+                animationPaused = false;
+                pauseStartTime = 0;
+                
                 switch (mode) {
                     case "bicubic":
                         bicubic_camera(durations);
@@ -431,7 +443,7 @@ $(document).ready(function(){
                         break;
                     
                     case "pause":
-                        pause_camera(durations);
+                        step_camera(durations);
                         break;
                     
                     default:
@@ -449,8 +461,8 @@ $(document).ready(function(){
                 setTimeout(function() {
                     dew.command("Camera.Mode default");
                     document.getElementById("chat").style.display = "block";
-                    chatboxHide();
-                }, 5000);
+                    //chatboxHide();
+                }, 2000);
             }
             
             function lerp_camera(durations) {
@@ -496,9 +508,13 @@ $(document).ready(function(){
                 
                 setTimeout(function() {
                 
-                    var startTime = performance.now();
+                    startTime = performance.now();
                     
                     cameraInterval = setInterval(function() {
+                        
+                        if (animationPaused) {
+                            return;
+                        }
                         
                         var currTrack = trackSizes.findIndex((v, i) => currentStep <= v);
                         if (currTrack == -1) {
@@ -765,9 +781,13 @@ $(document).ready(function(){
                 
                 setTimeout(function() {
                 
-                    var startTime = performance.now();
+                    startTime = performance.now();
                 
                     cameraInterval = setInterval(function() {
+                        
+                        if (animationPaused) {
+                            return;
+                        }
                         
                         // Compute camera position values
                         let currTime = performance.now() - startTime;                        
@@ -791,7 +811,7 @@ $(document).ready(function(){
                 return;
             }
             
-            function pause_camera(durations) {
+            function step_camera(durations) {
                 
                 durations = durations.map(n => n * 1000 * durations.length);
                 
@@ -807,7 +827,7 @@ $(document).ready(function(){
                         dew.command("Camera.Position " + positions[currPos][0] + " " + positions[currPos][1] + " " + positions[currPos][2] + " " + positions[currPos][3] + " " + positions[currPos][4]);
                         
                         if (cameraInterval && currPos < durations.length) {
-                            camera_step(currPos + 1);
+                            camera_step(currPos + ((!animationPaused) ? 1 : 0));
                         } else {
                             camera_end();
                         }
@@ -858,6 +878,32 @@ $(document).ready(function(){
             document.getElementById("chat").style.display = "block";
             chatboxHide();
             dew.notify("chat", { message: "Animation cancelled", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+            e.preventDefault();
+        }
+    });
+    
+    $("html").on("keydown", function(e){ //Pause animation if playing
+        if(e.keyCode == 80 && cameraInterval != undefined){ //ESC
+        
+            animationPaused = !animationPaused;
+            
+            if (animationPaused) {
+                pauseStartTime = performance.now();
+            } else {
+                startTime += (performance.now() - pauseStartTime);
+            }
+            
+            /*
+            if (!animationPaused) {
+                dew.command("Game.PlayUiSound 13");
+                setTimeout(() => {
+                    dew.command("Game.PlayUiSound 13");
+                }, 200);
+            } else {
+                dew.command("Game.PlayUiSound 14");
+            }
+            */
+            
             e.preventDefault();
         }
     });
