@@ -271,34 +271,43 @@ $(document).ready(function(){
                 
                 let popup = document.createElement("div");
                 popup.id = "camera_popup_id";
-                popup.style.width = "700px";
-                popup.style.height = "500px";
-                popup.style.padding = "10px";
+                
+                // General Appearance style
                 popup.style.background = "#142850";
                 popup.style.borderRadius = "4px";
+                popup.style.padding = "12px";
+                
+                // Popup style
                 popup.style.position = "absolute";
+                popup.style.width = "700px";
+                popup.style.height = "700px";
                 popup.style.top = "50%";
                 popup.style.left = "50%";
-                popup.style.margin = "-250px 0 0 -350px";
+                popup.style.margin = "-350px 0 0 -350px";
                 
-                let popup_p = document.createElement("p");
-                popup_p.innerText = "Import/Export: Copy/Paste/CTRL + A only";
-                popup_p.style.color = "white";
-                popup_p.style.textAlign = "center";
-                popup_p.style.borderRadius = "4px";
-                popup_p.style.width = "calc(100% - 20px);"; //"100%";
-                popup_p.style.height = "4%";
+                // Grid style
+                popup.style.display = "grid";
+                popup.style.gridTemplateColumns = "1fr 1fr";
+                popup.style.gridTemplateRows = "24px auto 24px";
+                popup.style.gridTemplateAreas = '"Title Title" "TextArea TextArea" "Exit Save"';
+                popup.style.gridColumnGap = "0px";
+                popup.style.gridRowGap = "4px";
+                
+                
+                let popup_title = document.createElement("div");
+                popup_title.innerText = "Import/Export: Copy/Paste/CTRL + (A/Z)/Keyboard only";
+                popup_title.style.color = "white";
+                popup_title.style.textAlign = "center";
+                popup_title.style.gridArea = "Title";
                 
                 let popup_textarea = document.createElement("textarea");
                 popup_textarea.id = "camera_popup_textarea_id";
                 popup_textarea.value = data;
-                popup_textarea.style.width = "100%";
-                popup_textarea.style.height = "80%";
+                popup_textarea.style.gridArea = "TextArea";
                 
                 let popup_close_button = document.createElement("button");
                 popup_close_button.textContent = "Import and Close";
-                popup_close_button.style.width = "100%";
-                popup_close_button.style.height = "4%";
+                popup_close_button.style.gridArea = "Save";
                 popup_close_button.onclick = function(e) {
                     
                     try {
@@ -324,8 +333,7 @@ $(document).ready(function(){
                 let popup_close_button2 = document.createElement("button");
                 popup_close_button2.id = "popup_close_button2";
                 popup_close_button2.textContent = "Close without importing";
-                popup_close_button2.style.width = "100%";
-                popup_close_button2.style.height = "4%";
+                popup_close_button2.style.gridArea = "Exit";
                 popup_close_button2.onclick = function() {
                     dataWindowOpen = false;
                     document.getElementById("camera_popup_id").outerHTML = "";
@@ -333,7 +341,7 @@ $(document).ready(function(){
                 };
                 
                 
-                popup.appendChild(popup_p);
+                popup.appendChild(popup_title);
                 popup.appendChild(popup_textarea);
                 popup.appendChild(popup_close_button);
                 popup.appendChild(popup_close_button2);
