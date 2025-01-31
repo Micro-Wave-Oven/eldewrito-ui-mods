@@ -799,12 +799,14 @@ $(document).ready(function(){
                 positions.push(...midPos);
                 positions.push(posB);
                 
+                cameraInterval = true;
+                
                 function camera_step(currPos) {
                     
                     setTimeout(() => {
                         dew.command("Camera.Position " + positions[currPos][0] + " " + positions[currPos][1] + " " + positions[currPos][2] + " " + positions[currPos][3] + " " + positions[currPos][4]);
                         
-                        if (currPos < durations.length) {
+                        if (cameraInterval && currPos < durations.length) {
                             camera_step(currPos + 1);
                         } else {
                             camera_end();
