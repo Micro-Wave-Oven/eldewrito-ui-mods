@@ -1025,7 +1025,7 @@ $(document).ready(function(){
                 var positions = [posA];
                 positions.push(...midPos);
                 
-                if (!loopCamera) {
+                if (!loopCamera || (loopCamera && JSON.stringify(posA) != JSON.stringify(posB))) {
                     durations.push(durations[0]);
                     positions.push(posB);
                 }
