@@ -168,6 +168,23 @@ $(document).ready(function(){
             }
             
             
+            var helpIndex = Math.max(
+                chatBoxInput.toLowerCase().indexOf("/help"),
+                chatBoxInput.toLowerCase().indexOf("/h"),
+                chatBoxInput.toLowerCase().indexOf("/?")
+            );
+            if (helpIndex >= 0) {
+                dew.notify("chat", { message: "To set the start point, do \"/startPos\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: "To set the end point, do \"/endPos\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                
+                dew.notify("chat", { message: "To add/delete/list/edit intermediary points, do \"/midPoints\" for the help", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                
+                dew.notify("chat", { message: "For camera/player help, do /camera", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+                
+                dew.notify("chat", { message: "To export/import the current points, do \"/import\"", sender: "Camera Tracking", chatType: "DEBUG", color: "#FF9000" });
+            }
+            
+            
             var dataIndex = chatBoxInput.toLowerCase().indexOf("/export");
             if (dataIndex >= 0) {
                 var data = {
@@ -395,7 +412,7 @@ $(document).ready(function(){
                 document.getElementById("chat").style.display = "none";
                 dew.command("Camera.Mode static");
                 
-                //$("#chatBox").val('');
+                $("#chatBox").val('');
                 
                 switch (mode) {
                     case "bicubic":
@@ -527,7 +544,7 @@ $(document).ready(function(){
                     }, cameraIntervalMs);
                     
                 }, 1000);
-                  
+                
                 return;
             }
             
@@ -767,7 +784,7 @@ $(document).ready(function(){
             
             function pause_camera(durations) {
                 
-                durations = durations.map(n => n * 1000);
+                durations = durations.map(n => n * 1000 * durations.length);
                 
                 var positions = [posA];
                 positions.push(...midPos);
@@ -788,7 +805,7 @@ $(document).ready(function(){
                 }                
                 
                 camera_step(0);
-                
+                return;
             }
             
             
