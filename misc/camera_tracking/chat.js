@@ -41,6 +41,7 @@ var pauseStartTime = 0;
 var loopCamera = false;
 
 var dataWindowOpen = false;
+var previewingPos = false;
 
 const EPSILON = Number.EPSILON;
 
@@ -70,7 +71,7 @@ $(document).ready(function(){
                 return;
             }
             
-            if (dataWindowOpen) {
+            if (dataWindowOpen && !previewingPos) {
                 
                 document.getElementById("popup_close_button2").click();
                 
@@ -78,7 +79,17 @@ $(document).ready(function(){
                 return;
             }
             
-            chatboxHide();
+            if (!previewingPos) {
+                chatboxHide();
+            }
+            
+            if (previewingPos) {
+                previewingPos = false;
+                
+                document.getElementById("camera_popup_id").style.visibility = "visible";
+                
+                dew.command("Camera.Mode first");
+            }
         }
                 
         if (e.keyCode == 44) {
@@ -87,7 +98,7 @@ $(document).ready(function(){
     });
     
     $("html").on("keydown", function(e){ //Pause animation if playing
-        if(e.keyCode == 80 && cameraInterval != undefined){ //ESC
+        if(e.keyCode == 80 && cameraInterval != undefined){ //P
         
             animationPaused = !animationPaused;
             
@@ -172,7 +183,8 @@ $(document).ready(function(){
                         tempPos = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
                         
                         if (curr_command.length >= 2) {
-                            tempPos.push(curr_command[1]);
+                            curr_command.shift();
+                            tempPos.push(curr_command.join(" "));
                         }
                         
                         midPos.push(tempPos);
@@ -254,11 +266,11 @@ $(document).ready(function(){
                 
                 // Popup style
                 popup.style.position = "absolute";
-                popup.style.width = "700px";
+                popup.style.width = "900px";
                 popup.style.height = "700px";
                 popup.style.top = "50%";
                 popup.style.left = "50%";
-                popup.style.margin = "-350px 0 0 -350px";
+                popup.style.margin = "-450px 0 0 -350px";
                 
                 // Grid style
                 popup.style.display = "grid";
@@ -280,9 +292,10 @@ $(document).ready(function(){
                 
                 // Close Button
                 let popup_close_button = document.createElement("button");
-                popup_close_button.id = "popup_close_button";
+                popup_close_button.id = "popup_close_button2";
                 popup_close_button.textContent = "Close";
                 popup_close_button.style.gridArea = "closeButton";
+                popup_close_button.style.display = "block";
                 popup_close_button.onclick = function() {
                     dataWindowOpen = false;
                     document.getElementById("camera_popup_id").outerHTML = "";
@@ -296,9 +309,6 @@ $(document).ready(function(){
                 start_pos_element.style.textAlign = "center";
                 start_pos_element.style.gridArea = "startPos";
 
-                function renderTextPos(pos) {
-                    return "X: " + pos[0] + " Y: " + pos[1] + " Z: " + pos[2] + " H: " + pos[3] + " V: " + pos[4] + ((pos.length > 5) ? " Comment: " + pos[5]: "");
-                }
                 
                 // Mid Pos
                 let mid_pos_element = document.createElement("div");
@@ -308,12 +318,33 @@ $(document).ready(function(){
                 
                 for (let i = 0; i < midPos.length; i++) {
                     let tmp_pos_element = document.createElement("div");
-                    tmp_pos_element.innerHTML = renderTextPos(midPos[i]);
-                    tmp_pos_element.id = "midPos_" + i;
                     
                     tmp_pos_element.style.textAlign = "center";
                     tmp_pos_element.style.color = "white";
                     tmp_pos_element.style.paddingTop = "4px";
+                    
+                    let pos_element_text = document.createElement("div");
+                    pos_element_text.innerText = "X: " + midPos[i][0] + " Y: " + midPos[i][1] + " Z: " + midPos[i][2] + " H: " + midPos[i][3] + " V: " + midPos[i][4] + ((midPos[i].length > 5) ? " Comment: " + midPos[i][5]: "");
+                    pos_element_text.style.display = "inline-block";
+                    tmp_pos_element.appendChild(pos_element_text);
+                    
+                    let pos_element_button = document.createElement("button");
+                    pos_element_button.textContent = "P";
+                    pos_element_button.style.marginLeft = "8px";
+                    pos_element_button.style.display = "inline-block";
+                    pos_element_button.onclick = function(e) {                        
+                        dew.notify("chat", { message: "Previewing position: " + midPos[i], sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        dew.notify("chat", { message: "Press Escape to leave", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        
+                        dew.command("Camera.Mode static");
+                        dew.command("Camera.Position " + midPos[i][0] + " " + midPos[i][1] + " " + midPos[i][2] + " " + midPos[i][3] + " " + midPos[i][4]);
+                        
+                        previewingPos = true;
+                        //document.getElementById("camera_popup_id").outerHTML = "";
+                        document.getElementById("camera_popup_id").style.visibility = "hidden";
+                    };
+                
+                    tmp_pos_element.appendChild(pos_element_button);
                     
                     mid_pos_element.appendChild(tmp_pos_element);
                 }
@@ -383,7 +414,7 @@ $(document).ready(function(){
                 dew.notify("chat", { message: " To set the start point, do \"/startPos\"", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To set the end point, do \"/endPos\"", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To add/delete/list/edit intermediary points, do \"/midPos\" for the help", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                dew.notify("chat", { message: " To Rearrange points, do \"/edit\" to bring up the menu", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " To Rearrange/Preview points, do \"/edit\" to bring up the menu", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " For camera/player help, do /camera", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To export/import the current points, do \"/import\"", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 
