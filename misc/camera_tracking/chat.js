@@ -163,81 +163,88 @@ $(document).ready(function(){
                 
                 var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 8).trim().replace(/  +/g, ' ').split(" ");
                 
-                // List points
-                if (curr_command[0] == "l" || curr_command[0] == "ls" || curr_command[0] == "list") {
-                    dew.notify("chat", { message: "Mid positions: ", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" }));
-                
-                
-                // Clear points
-                } else if (curr_command[0] == "c" || curr_command[0] == "clear") {
-                    midPos = [];
-                    dew.notify("chat", { message: "Mid positions cleared.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                
-                
-                // Add point
-                } else if (curr_command[0] == "a" || curr_command[0] == "add") {
-                
-                    dew.command('Camera.Position', {}).then(function(response) {
-                        
-                        tempPos = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
-                        
-                        if (curr_command.length >= 2) {
-                            curr_command.shift();
-                            tempPos.push(curr_command.join(" "));
-                        }
-                        
-                        midPos.push(tempPos);
-                        
-                        dew.notify("chat", { message: "Added: [" + tempPos.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    });
-                
-                
-                // Delete Point
-                } else if (curr_command[0] == "d" || curr_command[0] == "del" || curr_command[0] == "delete") {
+                switch (curr_command[0]) {
                     
-                    if (curr_command.length == 1) {
-                        dew.notify("chat", { message: "You need to enter the index of the position you want to delete, for example: /midpos " + curr_command[0] + " 1", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    } else {
+                    case "l":
+                    case "ls":
+                    case "list":
+                        dew.notify("chat", { message: "Mid positions: ", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" }));
+                        break;
                         
-                        var id_to_delete = parseInt(curr_command[1]);
-                        if (id_to_delete >= midPos.length) {
-                            dew.notify("chat", { message: "Incorrect id, do \"/midpos list\" to find the correct id", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    case "c":
+                    case "clear":
+                        midPos = [];
+                        dew.notify("chat", { message: "Mid positions cleared.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        break;
+                        
+                    
+                    case "a":
+                    case "add":
+                        dew.command('Camera.Position', {}).then(function(response) {
+                            
+                            tempPos = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
+                            
+                            if (curr_command.length >= 2) {
+                                curr_command.shift();
+                                tempPos.push(curr_command.join(" "));
+                            }
+                            
+                            midPos.push(tempPos);
+                            
+                            dew.notify("chat", { message: "Added: [" + tempPos.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        });
+                        break;
+                        
+                        
+                    case "d":
+                    case "del":
+                    case "delete":
+                        if (curr_command.length == 1) {
+                            dew.notify("chat", { message: "You need to enter the index of the position you want to delete, for example: /midpos " + curr_command[0] + " 1", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        } else {
+                            
+                            var id_to_delete = parseInt(curr_command[1]);
+                            if (id_to_delete >= midPos.length) {
+                                dew.notify("chat", { message: "Incorrect id, do \"/midpos list\" to find the correct id", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                            
+                            } else {
+                                let removed = midPos.splice(id_to_delete, 1)[0];
+                                dew.notify("chat", { message: "Removed: [" + removed.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                            }
+                        }
+                        break;
+                        
+                
+                    case "m":
+                    case "mv":
+                    case "move":
+                        if (curr_command.length != 3) {
+                            dew.notify("chat", { message: "Missing positions, usage: /midpos " + curr_command[0] + " <from> <to>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                         
                         } else {
-                            let removed = midPos.splice(id_to_delete, 1)[0];
-                            dew.notify("chat", { message: "Removed: [" + removed.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        }
-                    }
-                
-                
-                // Move point
-                } else if (curr_command[0] == "m" || curr_command[0] == "mv" || curr_command[0] == "move") {
-                    
-                    if (curr_command.length != 3) {
-                        dew.notify("chat", { message: "Missing positions, usage: /midpos " + curr_command[0] + " <from> <to>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    
-                    } else {
-                        var from = parseInt(curr_command[1]);
-                        var to = parseInt(curr_command[2]);
-                    
-                        var tmp_val = midPos[from];
-                        midPos.splice(from, 1);
-                        midPos.splice(to, 0, tmp_val);
+                            var from = parseInt(curr_command[1]);
+                            var to = parseInt(curr_command[2]);
                         
-                        dew.notify("chat", { message: "Moved:", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" }));
-                    }
-                
-                
-                // Display help
-                } else {
-                    dew.notify("chat", { message: "Middle/Intermediary points help:", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: " Add point: /midpos a <OPTIONAL NAME>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: " List points: /midpos l", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: " Move point: /midpos mv <from> <to>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: " Delete point: /midpos del <index>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: " Clear points: /midpos c", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                            var tmp_val = midPos[from];
+                            midPos.splice(from, 1);
+                            midPos.splice(to, 0, tmp_val);
+                            
+                            dew.notify("chat", { message: "Moved:", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                            midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" }));
+                        }
+                        break;
+                        
+                        
+                    default:
+                        dew.notify("chat", { message: "Middle/Intermediary points help:", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        dew.notify("chat", { message: " Add point: /midpos a <OPTIONAL NAME>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        dew.notify("chat", { message: " List points: /midpos l", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        dew.notify("chat", { message: " Move point: /midpos mv <from> <to>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        dew.notify("chat", { message: " Delete point: /midpos del <index>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        dew.notify("chat", { message: " Clear points: /midpos c", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        break;
                 }
                 
                 chatboxHide();
@@ -268,9 +275,11 @@ $(document).ready(function(){
                 popup.style.position = "absolute";
                 popup.style.width = "900px";
                 popup.style.height = "700px";
+                popup.style.maxHeight = "700px";
                 popup.style.top = "50%";
                 popup.style.left = "50%";
                 popup.style.margin = "-450px 0 0 -350px";
+                popup.style.overflowY = "auto";
                 
                 // Grid style
                 popup.style.display = "grid";
@@ -283,12 +292,11 @@ $(document).ready(function(){
                 
                 // Title
                 let popup_title = document.createElement("div");
-                popup_title.innerText = "Points Edit";
+                popup_title.innerText = "Points Edit (Drag and Drop to rearrange)";
                 popup_title.style.color = "white";
                 popup_title.style.textAlign = "center";
                 popup_title.style.gridArea = "Title";
-                
-                
+                popup_title.style.textDecoration = "underline"; 
                 
                 // Close Button
                 let popup_close_button = document.createElement("button");
@@ -322,6 +330,9 @@ $(document).ready(function(){
                     tmp_pos_element.style.textAlign = "center";
                     tmp_pos_element.style.color = "white";
                     tmp_pos_element.style.paddingTop = "4px";
+                    tmp_pos_element.style.border = "1px solid white";
+                    tmp_pos_element.style.borderRadius = "4px";
+                    tmp_pos_element.style.marginTop = "2px";
                     
                     let pos_element_text = document.createElement("div");
                     pos_element_text.innerText = "X: " + midPos[i][0] + " Y: " + midPos[i][1] + " Z: " + midPos[i][2] + " H: " + midPos[i][3] + " V: " + midPos[i][4] + ((midPos[i].length > 5) ? " Comment: " + midPos[i][5]: "");
@@ -333,14 +344,13 @@ $(document).ready(function(){
                     pos_element_button.style.marginLeft = "8px";
                     pos_element_button.style.display = "inline-block";
                     pos_element_button.onclick = function(e) {                        
-                        dew.notify("chat", { message: "Previewing position: " + midPos[i], sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        dew.notify("chat", { message: "Previewing position: [" + midPos[i] + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                         dew.notify("chat", { message: "Press Escape to leave", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                         
                         dew.command("Camera.Mode static");
                         dew.command("Camera.Position " + midPos[i][0] + " " + midPos[i][1] + " " + midPos[i][2] + " " + midPos[i][3] + " " + midPos[i][4]);
                         
                         previewingPos = true;
-                        //document.getElementById("camera_popup_id").outerHTML = "";
                         document.getElementById("camera_popup_id").style.visibility = "hidden";
                     };
                 
@@ -474,6 +484,7 @@ $(document).ready(function(){
                 popup_title.style.color = "white";
                 popup_title.style.textAlign = "center";
                 popup_title.style.gridArea = "Title";
+                popup_title.style.textDecoration = "underline"; 
                 
                 let popup_textarea = document.createElement("textarea");
                 popup_textarea.id = "camera_popup_textarea_id";
