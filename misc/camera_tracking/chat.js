@@ -312,10 +312,34 @@ $(document).ready(function(){
                 
                 // Start Pos
                 let start_pos_element = document.createElement("div");
-                start_pos_element.innerText = "Start: " + ((posA != undefined) ? posA : "position not set");
-                start_pos_element.style.color = "white";
                 start_pos_element.style.textAlign = "center";
-                start_pos_element.style.gridArea = "startPos";
+                
+                let start_pos_text = document.createElement("div");
+                start_pos_text.innerText = "Start: " + ((posA != undefined) ? posA : "position not set");
+                start_pos_text.style.color = "white";
+                start_pos_text.style.textAlign = "center";
+                start_pos_text.style.gridArea = "startPos";
+                start_pos_text.style.display = "inline-block";
+                
+                let start_pos_preview_button = document.createElement("button");
+                start_pos_preview_button.textContent = "P";
+                start_pos_preview_button.style.marginLeft = "8px";
+                start_pos_preview_button.style.display = "inline-block";
+                start_pos_preview_button.onclick = function(e) {                        
+                    dew.notify("chat", { message: "Previewing position startPos", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "Press Escape to leave", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    dew.command("Camera.Mode static");
+                    dew.command("Camera.Position " + posA[0] + " " + posA[1] + " " + posA[2] + " " + posA[3] + " " + posA[4]);
+                    
+                    previewingPos = true;
+                    document.getElementById("camera_popup_id").style.visibility = "hidden";
+                };
+                
+                start_pos_element.appendChild(start_pos_text);
+                if (posA != undefined) {
+                    start_pos_element.appendChild(start_pos_preview_button);
+                }
 
                 
                 // Mid Pos
@@ -359,12 +383,37 @@ $(document).ready(function(){
                     mid_pos_element.appendChild(tmp_pos_element);
                 }
                 
+                
                 // End Pos
                 let end_pos_element = document.createElement("div");
-                end_pos_element.innerText = "End: " + ((posB != undefined) ? posB : "position not set");
-                end_pos_element.style.color = "white";
                 end_pos_element.style.textAlign = "center";
-                end_pos_element.style.gridArea = "endPos";
+                
+                let end_pos_text = document.createElement("div");
+                end_pos_text.innerText = "End: " + ((posB != undefined) ? posB : "position not set");
+                end_pos_text.style.color = "white";
+                end_pos_text.style.textAlign = "center";
+                end_pos_text.style.gridArea = "endPos";
+                end_pos_text.style.display = "inline-block";
+                
+                let end_pos_preview_button = document.createElement("button");
+                end_pos_preview_button.textContent = "P";
+                end_pos_preview_button.style.marginLeft = "8px";
+                end_pos_preview_button.style.display = "inline-block";
+                end_pos_preview_button.onclick = function(e) {                        
+                    dew.notify("chat", { message: "Previewing position endPos", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "Press Escape to leave", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    dew.command("Camera.Mode static");
+                    dew.command("Camera.Position " + posB[0] + " " + posB[1] + " " + posB[2] + " " + posB[3] + " " + posB[4]);
+                    
+                    previewingPos = true;
+                    document.getElementById("camera_popup_id").style.visibility = "hidden";
+                };
+                
+                end_pos_element.appendChild(end_pos_text);
+                if (posB != undefined) {
+                    end_pos_element.appendChild(end_pos_preview_button);
+                }
                 
                 
                 // Add elements to the popup
