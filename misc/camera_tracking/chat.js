@@ -44,6 +44,13 @@ var dataWindowOpen = false;
 
 const EPSILON = Number.EPSILON;
 
+// Load JQuery UI
+
+$.ajax({
+    url: "https://code.jquery.com/ui/1.14.1/jquery-ui.min.js",
+    dataType: "script"
+});
+
 $(document).ready(function(){
     $(document).keyup(function (e) {
         if (e.keyCode === 27) {
@@ -226,6 +233,139 @@ $(document).ready(function(){
             }
             
             
+            var dataIndex = chatBoxInput.toLowerCase().indexOf("/edit");
+            if (dataIndex >= 0) {
+                
+                if (dataWindowOpen) {
+                    $("#chatBox").val('');
+                    $("#chatBox").hide();
+                    $("#chatWindow").css("bottom", "0");
+                    $("#chatWindow").addClass("hide-scrollbar");
+                    return;
+                }
+                
+                let popup = document.createElement("div");
+                popup.id = "camera_popup_id";
+                
+                // General Appearance style
+                popup.style.background = "#142850";
+                popup.style.borderRadius = "4px";
+                popup.style.padding = "12px";
+                
+                // Popup style
+                popup.style.position = "absolute";
+                popup.style.width = "700px";
+                popup.style.height = "700px";
+                popup.style.top = "50%";
+                popup.style.left = "50%";
+                popup.style.margin = "-350px 0 0 -350px";
+                
+                // Grid style
+                popup.style.display = "grid";
+                popup.style.gridTemplateColumns = "1fr";
+                popup.style.gridTemplateRows = "24px 32px auto 32px 24px";
+                popup.style.gridTemplateAreas = '"Title" "startPos" "midPos" "endPos" "closeButton"';
+                popup.style.gridColumnGap = "0px";
+                popup.style.gridRowGap = "4px";
+                
+                
+                // Title
+                let popup_title = document.createElement("div");
+                popup_title.innerText = "Points Edit";
+                popup_title.style.color = "white";
+                popup_title.style.textAlign = "center";
+                popup_title.style.gridArea = "Title";
+                
+                
+                
+                // Close Button
+                let popup_close_button = document.createElement("button");
+                popup_close_button.id = "popup_close_button";
+                popup_close_button.textContent = "Close";
+                popup_close_button.style.gridArea = "closeButton";
+                popup_close_button.onclick = function() {
+                    dataWindowOpen = false;
+                    document.getElementById("camera_popup_id").outerHTML = "";
+                    chatboxHide();
+                };
+                
+                // Start Pos
+                let start_pos_element = document.createElement("div");
+                start_pos_element.innerText = "Start: " + ((posA != undefined) ? posA : "position not set");
+                start_pos_element.style.color = "white";
+                start_pos_element.style.textAlign = "center";
+                start_pos_element.style.gridArea = "startPos";
+
+                function renderTextPos(pos) {
+                    return "X: " + pos[0] + " Y: " + pos[1] + " Z: " + pos[2] + " H: " + pos[3] + " V: " + pos[4] + ((pos.length > 5) ? " Comment: " + pos[5]: "");
+                }
+                
+                // Mid Pos
+                let mid_pos_element = document.createElement("div");
+                mid_pos_element.classList.add("sortableList");
+                mid_pos_element.style.textAlign = "center";
+                mid_pos_element.style.gridArea = "midPos";
+                
+                for (let i = 0; i < midPos.length; i++) {
+                    let tmp_pos_element = document.createElement("div");
+                    tmp_pos_element.innerHTML = renderTextPos(midPos[i]);
+                    tmp_pos_element.id = "midPos_" + i;
+                    
+                    tmp_pos_element.style.textAlign = "center";
+                    tmp_pos_element.style.color = "white";
+                    tmp_pos_element.style.paddingTop = "4px";
+                    
+                    mid_pos_element.appendChild(tmp_pos_element);
+                }
+                
+                // End Pos
+                let end_pos_element = document.createElement("div");
+                end_pos_element.innerText = "End: " + ((posB != undefined) ? posB : "position not set");
+                end_pos_element.style.color = "white";
+                end_pos_element.style.textAlign = "center";
+                end_pos_element.style.gridArea = "endPos";
+                
+                
+                // Add elements to the popup
+                popup.appendChild(popup_title);
+                popup.appendChild(start_pos_element);
+                popup.appendChild(mid_pos_element);
+                popup.appendChild(end_pos_element);
+                popup.appendChild(popup_close_button);
+                
+                // Add popup to page
+                document.body.appendChild(popup);
+                
+                
+                
+                $('.sortableList').sortable({
+                    start: function(e, ui) {
+                        $(this).attr('data-old-index', ui.item.index());
+                    },
+                    update: function(e, ui) {
+                        var newIndex = ui.item.index();
+                        var oldIndex = $(this).attr('data-old-index');
+                        $(this).removeAttr('data-old-index');
+                        
+                        var tmp_element = midPos[oldIndex];
+                        midPos.splice(oldIndex, 1);
+                        midPos.splice(newIndex, 0, tmp_element);
+                    }
+                });
+                
+                
+                dataWindowOpen = true;
+                
+                $("#chatBox").val('');
+                $("#chatBox").hide();
+                $("#chatWindow").css("bottom", "0");
+                $("#chatWindow").addClass("hide-scrollbar");
+                $("#camera_popup_textarea_id").focus()
+                
+                return;
+            }
+        
+        
             var intervalIndex = chatBoxInput.toLowerCase().indexOf("/interval");
             if (intervalIndex >= 0) {
                 cameraIntervalMs = parseInt(chatBoxInput.substring(intervalIndex + 10));
@@ -243,6 +383,7 @@ $(document).ready(function(){
                 dew.notify("chat", { message: " To set the start point, do \"/startPos\"", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To set the end point, do \"/endPos\"", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To add/delete/list/edit intermediary points, do \"/midPos\" for the help", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " To Rearrange points, do \"/edit\" to bring up the menu", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " For camera/player help, do /camera", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To export/import the current points, do \"/import\"", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 
