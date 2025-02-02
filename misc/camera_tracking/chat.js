@@ -27,9 +27,7 @@ var cachedPlayerJSON;
 
 
 // Auto Camera Tracking
-var posA = undefined;
-var posB = undefined;
-var midPos = [];
+var positions = [];
 
 var currentStep = 0;
 var cameraIntervalMs = 5;
@@ -135,116 +133,91 @@ $(document).ready(function(){
             
             // Auto Camera Tracking Commands
             
-            var posIndex = Math.max(
-                chatBoxInput.toLowerCase().indexOf("/posa"),
-                chatBoxInput.toLowerCase().indexOf("/startpos")
-            );
+            var posIndex = chatBoxInput.toLowerCase().indexOf("/add");
             if (posIndex >= 0) {                
                 dew.command('Camera.Position', {}).then(function(response) {
-                    posA = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
-                    dew.notify("chat", { message: "Start Position: " + JSON.stringify(posA), sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    var tempPos = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
+                    
+                    var comment = chatBoxInput.substring(posIndex + 5)
+                    if (comment.length > 0) {
+                        tempPos.push(comment);
+                    }
+                    
+                    positions.push(tempPos);
+                    
+                    dew.notify("chat", { message: "Added: [" + tempPos.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 });
+                
+                chatboxHide();
+                return;
             }
             
-            var posIndex = Math.max(
-                chatBoxInput.toLowerCase().indexOf("/posb"),
-                chatBoxInput.toLowerCase().indexOf("/endpos")
-            );
-            if (posIndex >= 0) {
-                dew.command('Camera.Position', {}).then(function(response) {
-                    posB = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
-                    dew.notify("chat", { message: "End Position: " + JSON.stringify(posB), sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+            
+            var listIndex = chatBoxInput.toLowerCase().indexOf("/list");
+            if (listIndex >= 0) {
+                dew.notify("chat", { message: "Positions: ", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                positions.forEach((item, index) => {
+                    dew.notify("chat", { message: index + " - [" + item.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" })
                 });
+                
+                chatboxHide();
+                return;
             }
             
             
-            var posIndex = chatBoxInput.toLowerCase().indexOf("/midpos");
-            if (posIndex >= 0) {
+            var clearIndex = chatBoxInput.toLowerCase().indexOf("/clear");
+            if (clearIndex >= 0) {
+                positions = [];
+                dew.notify("chat", { message: "Positions cleared.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 
-                var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 8).trim().replace(/  +/g, ' ').split(" ");
+                chatboxHide();
+                return;
+            }
+            
+            
+            var delIndex = chatBoxInput.toLowerCase().indexOf("/del");
+            if (delIndex >= 0) {
                 
-                switch (curr_command[0]) {
-                    
-                    case "l":
-                    case "ls":
-                    case "list":
-                        dew.notify("chat", { message: "Mid positions: ", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" }));
-                        break;
-                        
-                    
-                    case "c":
-                    case "clear":
-                        midPos = [];
-                        dew.notify("chat", { message: "Mid positions cleared.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        break;
-                        
-                    
-                    case "a":
-                    case "add":
-                        dew.command('Camera.Position', {}).then(function(response) {
-                            
-                            tempPos = response.replace(/X|Y|Z|H|V|L|,|:/g, '').trim().replace(/  +/g, ' ').split(" ").map(Number);
-                            
-                            if (curr_command.length >= 2) {
-                                curr_command.shift();
-                                tempPos.push(curr_command.join(" "));
-                            }
-                            
-                            midPos.push(tempPos);
-                            
-                            dew.notify("chat", { message: "Added: [" + tempPos.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        });
-                        break;
-                        
-                        
-                    case "d":
-                    case "del":
-                    case "delete":
-                        if (curr_command.length == 1) {
-                            dew.notify("chat", { message: "You need to enter the index of the position you want to delete, for example: /midpos " + curr_command[0] + " 1", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        } else {
-                            
-                            var id_to_delete = parseInt(curr_command[1]);
-                            if (id_to_delete >= midPos.length) {
-                                dew.notify("chat", { message: "Incorrect id, do \"/midpos list\" to find the correct id", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                            
-                            } else {
-                                let removed = midPos.splice(id_to_delete, 1)[0];
-                                dew.notify("chat", { message: "Removed: [" + removed.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                            }
-                        }
-                        break;
-                        
+                var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 5);
                 
-                    case "m":
-                    case "mv":
-                    case "move":
-                        if (curr_command.length != 3) {
-                            dew.notify("chat", { message: "Missing positions, usage: /midpos " + curr_command[0] + " <from> <to>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        
-                        } else {
-                            var from = parseInt(curr_command[1]);
-                            var to = parseInt(curr_command[2]);
-                        
-                            var tmp_val = midPos[from];
-                            midPos.splice(from, 1);
-                            midPos.splice(to, 0, tmp_val);
-                            
-                            dew.notify("chat", { message: "Moved:", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                            midPos.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" }));
-                        }
-                        break;
-                        
-                        
-                    default:
-                        dew.notify("chat", { message: "Middle/Intermediary points help:", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        dew.notify("chat", { message: " Add point: /midpos a <OPTIONAL NAME>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        dew.notify("chat", { message: " List points: /midpos l", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        dew.notify("chat", { message: " Move point: /midpos mv <from> <to>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        dew.notify("chat", { message: " Delete point: /midpos del <index>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        dew.notify("chat", { message: " Clear points: /midpos c", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        break;
+                if (curr_command == "") {
+                    dew.notify("chat", { message: "You need to enter the index of the position you want to delete, for example: /del 2", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                } else {
+                    
+                    var id_to_delete = parseInt(curr_command);
+                    if (id_to_delete >= positions.length) {
+                        dew.notify("chat", { message: "Incorrect id, do \"/list\" to find the correct id", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    } else {
+                        let removed = positions.splice(id_to_delete, 1)[0];
+                        dew.notify("chat", { message: "Removed: [" + removed.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    }
+                }
+                
+                chatboxHide();
+                return;
+            }
+            
+            
+            var mvIndex = chatBoxInput.toLowerCase().indexOf("/mv");
+            if (mvIndex >= 0) {
+                
+                var curr_command = chatBoxInput.toLowerCase().substring(posIndex + 4).trim().replace(/  +/g, ' ').split(" ");
+                
+                if (curr_command.length != 2) {
+                    dew.notify("chat", { message: "Missing positions, usage: /mv <from> <to>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                
+                } else {
+                    var from = parseInt(curr_command[0]);
+                    var to = parseInt(curr_command[1]);
+                
+                    var tmp_val = positions[from];
+                    positions.splice(from, 1);
+                    positions.splice(to, 0, tmp_val);
+                    
+                    dew.notify("chat", { message: "Moved:", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    positions.forEach((item, index) => dew.notify("chat", { message: index + " - [" + item + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" }));
                 }
                 
                 chatboxHide();
@@ -284,8 +257,8 @@ $(document).ready(function(){
                 // Grid style
                 popup.style.display = "grid";
                 popup.style.gridTemplateColumns = "1fr";
-                popup.style.gridTemplateRows = "24px 32px auto 32px 24px";
-                popup.style.gridTemplateAreas = '"Title" "startPos" "midPos" "endPos" "closeButton"';
+                popup.style.gridTemplateRows = "24px auto 24px";
+                popup.style.gridTemplateAreas = '"Title" "positions" "closeButton"';
                 popup.style.gridColumnGap = "0px";
                 popup.style.gridRowGap = "4px";
                 
@@ -310,46 +283,15 @@ $(document).ready(function(){
                     chatboxHide();
                 };
                 
-                // Start Pos
-                let start_pos_element = document.createElement("div");
-                start_pos_element.style.textAlign = "center";
+                // Positions
+                let positions_element = document.createElement("div");
+                positions_element.classList.add("sortableList");
+                positions_element.style.textAlign = "center";
+                positions_element.style.gridArea = "positions";
                 
-                let start_pos_text = document.createElement("div");
-                start_pos_text.innerText = "Start: " + ((posA != undefined) ? posA : "position not set");
-                start_pos_text.style.color = "white";
-                start_pos_text.style.textAlign = "center";
-                start_pos_text.style.gridArea = "startPos";
-                start_pos_text.style.display = "inline-block";
-                
-                let start_pos_preview_button = document.createElement("button");
-                start_pos_preview_button.textContent = "P";
-                start_pos_preview_button.style.marginLeft = "8px";
-                start_pos_preview_button.style.display = "inline-block";
-                start_pos_preview_button.onclick = function(e) {                        
-                    dew.notify("chat", { message: "Previewing position startPos", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: "Press Escape to leave", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    
-                    dew.command("Camera.Mode static");
-                    dew.command("Camera.Position " + posA[0] + " " + posA[1] + " " + posA[2] + " " + posA[3] + " " + posA[4]);
-                    
-                    previewingPos = true;
-                    document.getElementById("camera_popup_id").style.visibility = "hidden";
-                };
-                
-                start_pos_element.appendChild(start_pos_text);
-                if (posA != undefined) {
-                    start_pos_element.appendChild(start_pos_preview_button);
-                }
-
-                
-                // Mid Pos
-                let mid_pos_element = document.createElement("div");
-                mid_pos_element.classList.add("sortableList");
-                mid_pos_element.style.textAlign = "center";
-                mid_pos_element.style.gridArea = "midPos";
-                
-                for (let i = 0; i < midPos.length; i++) {
+                for (let i = 0; i < positions.length; i++) {
                     let tmp_pos_element = document.createElement("div");
+                    tmp_pos_element.id = "camera_edit_list_position_" + i;
                     
                     tmp_pos_element.style.textAlign = "center";
                     tmp_pos_element.style.color = "white";
@@ -359,68 +301,51 @@ $(document).ready(function(){
                     tmp_pos_element.style.marginTop = "2px";
                     
                     let pos_element_text = document.createElement("div");
-                    pos_element_text.innerText = "X: " + midPos[i][0] + " Y: " + midPos[i][1] + " Z: " + midPos[i][2] + " H: " + midPos[i][3] + " V: " + midPos[i][4] + ((midPos[i].length > 5) ? " Comment: " + midPos[i][5]: "");
+                    pos_element_text.innerText = "X: " + positions[i][0] + " Y: " + positions[i][1] + " Z: " + positions[i][2] + " H: " + positions[i][3] + " V: " + positions[i][4] + ((positions[i].length > 5) ? " Comment: " + positions[i][5]: "");
                     pos_element_text.style.display = "inline-block";
-                    tmp_pos_element.appendChild(pos_element_text);
                     
-                    let pos_element_button = document.createElement("button");
-                    pos_element_button.textContent = "P";
-                    pos_element_button.style.marginLeft = "8px";
-                    pos_element_button.style.display = "inline-block";
-                    pos_element_button.onclick = function(e) {                        
-                        dew.notify("chat", { message: "Previewing position: [" + midPos[i] + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    let pos_element_button_preview = document.createElement("button");
+                    pos_element_button_preview.textContent = "P";
+                    pos_element_button_preview.style.marginLeft = "8px";
+                    pos_element_button_preview.style.display = "inline-block";
+                    pos_element_button_preview.onclick = function(e) {                        
+                        dew.notify("chat", { message: "Previewing position: [" + positions[i] + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                         dew.notify("chat", { message: "Press Escape to leave", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                         
                         dew.command("Camera.Mode static");
-                        dew.command("Camera.Position " + midPos[i][0] + " " + midPos[i][1] + " " + midPos[i][2] + " " + midPos[i][3] + " " + midPos[i][4]);
+                        dew.command("Camera.Position " + positions[i][0] + " " + positions[i][1] + " " + positions[i][2] + " " + positions[i][3] + " " + positions[i][4]);
                         
                         previewingPos = true;
                         document.getElementById("camera_popup_id").style.visibility = "hidden";
                     };
-                
-                    tmp_pos_element.appendChild(pos_element_button);
                     
-                    mid_pos_element.appendChild(tmp_pos_element);
+                    let pos_element_button_delete = document.createElement("button");
+                    pos_element_button_delete.textContent = "D";
+                    pos_element_button_delete.style.marginLeft = "8px";
+                    pos_element_button_delete.style.display = "inline-block";
+                    pos_element_button_delete.onclick = function(e) {
+                        if (confirm("Would you like to delete the following point ?: " + JSON.stringify(positions[i])) == true) {
+                            let removed = positions.splice(i, 1)[0];
+                            dew.notify("chat", { message: "Removed: [" + removed.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" }); 
+                            
+                            // Kinda have to close the list because it's not reactive and the indexes wouldn't line up after deleting one Element
+                            // TODO: Allow multiple deletions back to back when I'm not lazy
+                            dataWindowOpen = false;
+                            document.getElementById("camera_popup_id").outerHTML = "";
+                            chatboxHide();
+                        }
+                    };
+                
+                    tmp_pos_element.appendChild(pos_element_text);
+                    tmp_pos_element.appendChild(pos_element_button_preview);
+                    tmp_pos_element.appendChild(pos_element_button_delete);
+                    
+                    positions_element.appendChild(tmp_pos_element);
                 }
-                
-                
-                // End Pos
-                let end_pos_element = document.createElement("div");
-                end_pos_element.style.textAlign = "center";
-                
-                let end_pos_text = document.createElement("div");
-                end_pos_text.innerText = "End: " + ((posB != undefined) ? posB : "position not set");
-                end_pos_text.style.color = "white";
-                end_pos_text.style.textAlign = "center";
-                end_pos_text.style.gridArea = "endPos";
-                end_pos_text.style.display = "inline-block";
-                
-                let end_pos_preview_button = document.createElement("button");
-                end_pos_preview_button.textContent = "P";
-                end_pos_preview_button.style.marginLeft = "8px";
-                end_pos_preview_button.style.display = "inline-block";
-                end_pos_preview_button.onclick = function(e) {                        
-                    dew.notify("chat", { message: "Previewing position endPos", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    dew.notify("chat", { message: "Press Escape to leave", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    
-                    dew.command("Camera.Mode static");
-                    dew.command("Camera.Position " + posB[0] + " " + posB[1] + " " + posB[2] + " " + posB[3] + " " + posB[4]);
-                    
-                    previewingPos = true;
-                    document.getElementById("camera_popup_id").style.visibility = "hidden";
-                };
-                
-                end_pos_element.appendChild(end_pos_text);
-                if (posB != undefined) {
-                    end_pos_element.appendChild(end_pos_preview_button);
-                }
-                
                 
                 // Add elements to the popup
                 popup.appendChild(popup_title);
-                popup.appendChild(start_pos_element);
-                popup.appendChild(mid_pos_element);
-                popup.appendChild(end_pos_element);
+                popup.appendChild(positions_element);
                 popup.appendChild(popup_close_button);
                 
                 // Add popup to page
@@ -437,9 +362,9 @@ $(document).ready(function(){
                         var oldIndex = $(this).attr('data-old-index');
                         $(this).removeAttr('data-old-index');
                         
-                        var tmp_element = midPos[oldIndex];
-                        midPos.splice(oldIndex, 1);
-                        midPos.splice(newIndex, 0, tmp_element);
+                        var tmp_element = positions[oldIndex];
+                        positions.splice(oldIndex, 1);
+                        positions.splice(newIndex, 0, tmp_element);
                     }
                 });
                 
@@ -470,9 +395,11 @@ $(document).ready(function(){
             );
             if (helpIndex >= 0) {
                 dew.notify("chat", { message: "Camera Tracking Help:", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                dew.notify("chat", { message: " To set the start point, do \"/startPos\"", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                dew.notify("chat", { message: " To set the end point, do \"/endPos\"", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                dew.notify("chat", { message: " To add/delete/list/edit intermediary points, do \"/midPos\" for the help", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " Add point: /add <OPTIONAL NAME>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " List points: /list", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " Move point: /mv <from> <to>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " Delete point: /del <index>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                dew.notify("chat", { message: " Clear points: /clear", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To Rearrange/Preview points, do \"/edit\" to bring up the menu", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " For camera/player help, do /camera", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                 dew.notify("chat", { message: " To export/import the current points, do \"/import\"", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
@@ -497,9 +424,7 @@ $(document).ready(function(){
                 }                    
                 
                 var data = {
-                    start: posA,
-                    midPoints: midPos,
-                    end: posB
+                    positions: positions
                 };
                 data = JSON.stringify(data, null, 4);
                 
@@ -546,16 +471,23 @@ $(document).ready(function(){
                 popup_close_button.onclick = function(e) {
                     
                     try {
-                        var parsedData = JSON.parse(document.getElementById("camera_popup_textarea_id").value);                        
-                        if (Object.hasOwn(parsedData, 'start')) {
-                            posA = parsedData.start;
-                        }                        
-                        if (Object.hasOwn(parsedData, 'midPoints')) {
-                            midPos = parsedData.midPoints;
-                        }                        
-                        if (Object.hasOwn(parsedData, 'end')) {
-                            posB = parsedData.end;
+                        var parsedData = JSON.parse(document.getElementById("camera_popup_textarea_id").value);
+                        if (Object.hasOwn(parsedData, 'positions')) {
+                            positions = parsedData.positions;
                         }
+                        
+                        // Support for old exports
+                        if (Object.hasOwn(parsedData, 'start')) {
+                            positions = [];
+                            positions.push(parsedData.start);
+                            if (Object.hasOwn(parsedData, 'midPoints')) {
+                                positions = positions.concat(parsedData.midPoints);
+                            }
+                            if (Object.hasOwn(parsedData, 'end')) {
+                                positions.push(parsedData.end);
+                            }
+                        }
+                        
                     } catch (e) {
                         dew.notify("chat", { message: "Error parsing data: " + e.toString(), sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     }
@@ -620,8 +552,8 @@ $(document).ready(function(){
                     return;
                 }
                 
-                if ( posA == undefined || posB == undefined ) {
-                    dew.notify("chat", { message: "Missing either start or end position", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                if ( positions.length < 2 ) {
+                    dew.notify("chat", { message: "You need at list two points", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     chatboxHide();
                     return;
                 }
@@ -663,7 +595,7 @@ $(document).ready(function(){
                 
                 
                 var durations = [];
-                var customDurationsEnabled = (midPos.length != 0) && (curr_command[0] == "dur");
+                var customDurationsEnabled = (positions.length > 2) && (curr_command[0] == "dur");
                 
                 if (!customDurationsEnabled && (isNaN(curr_command[0]) || !isFinite(curr_command[0])) ) {
                     dew.notify("chat", { message: "Duration needs to be a number", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
@@ -675,14 +607,14 @@ $(document).ready(function(){
                     durations = curr_command.splice(1).map(Number);
                     
                 } else {
-                    let per_track_dur = parseFloat(curr_command[0]) / (1 + midPos.length);
-                    for (let i = 0; i < (1 + midPos.length); i++) {
+                    let per_track_dur = parseFloat(curr_command[0]) / (positions.length - 1);
+                    for (let i = 0; i < (positions.length - 1); i++) {
                         durations.push(per_track_dur);
                     }
                 }
                 
-                if (durations.length == 0 || durations.length != (1 + midPos.length)) {
-                    dew.notify("chat", { message: "Incorrect number of durations, you have " + (1 + midPos.length) + " tracks and " + durations.length + " durations.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                if (durations.length == 0 || durations.length != (positions.length - 1)) {
+                    dew.notify("chat", { message: "Incorrect number of durations, you have " + (positions.length - 1) + " tracks and " + durations.length + " durations.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     chatboxHide();
                     return;
                 }
@@ -740,11 +672,11 @@ $(document).ready(function(){
             
             function lerp_camera(durations) {
                 
-                
                 var timeValue = durations.reduce((a, b) => a + b, 0);
                 var timeInMs = timeValue * 1000;
-                var nbTracks = 1 + midPos.length;
+                var nbTracks = positions.length - 1;
                 
+                // TODO: Shouldn't need to use steps at all, just time values, might improve
                 var steps = parseInt(timeInMs / cameraIntervalMs);
                 steps = steps + (nbTracks - (steps % nbTracks)) - nbTracks;
 
@@ -754,21 +686,11 @@ $(document).ready(function(){
                 trackSizes = trackSizes.map((elem, index) => trackSizes.slice(0, index + 1).reduce((a, b) => a + b));
                 
                 
-                
                 currentStep = 0;
                 
                 var prevTrack = 0;
-                var tempPosA = undefined;
-                var tempPosB = undefined;
-                        
-                if (nbTracks == 1) {
-                    tempPosA = posA;
-                    tempPosB = posB;
-                    
-                } else {
-                    tempPosA = posA;
-                    tempPosB = midPos[0];
-                }
+                var tempPosA = positions[0];
+                var tempPosB = positions[1];
                 
                 // Fix potential rotation wrap issue
                 if (Math.abs(tempPosA[3] - tempPosB[3]) > Math.PI) {
@@ -802,13 +724,8 @@ $(document).ready(function(){
                             startTime = performance.now();
                             
                             
-                            if (currTrack == (nbTracks - 1)) { // Last track
-                                tempPosA = midPos[currTrack - 1];
-                                tempPosB = posB;
-                            } else {
-                                tempPosA = midPos[currTrack - 1]; // Not last track
-                                tempPosB = midPos[currTrack];
-                            }
+                            tempPosA = positions[currTrack];
+                            tempPosB = positions[currTrack + 1];
                 
                             // Fix potential rotation wrap issue
                             if (Math.abs(tempPosA[3] - tempPosB[3]) > Math.PI) {
@@ -1054,7 +971,7 @@ $(document).ready(function(){
                 
                 var timeValue = durations.reduce((a, b) => a + b, 0);
                 var timeInMs = timeValue * 1000;
-                var nbTracks = 1 + midPos.length;
+                var nbTracks = positions.length - 1;
                 
                 var steps = parseInt(timeInMs / cameraIntervalMs);
                 steps = steps + (nbTracks - (steps % nbTracks)) - nbTracks;
@@ -1062,62 +979,54 @@ $(document).ready(function(){
                 // Durations will be the x axis values for each point in time
                 durations = durations.map(x => x * 1000);
                 durations.unshift(0);
-                durations = durations.map((elem, index) => durations.slice(0, index + 1).reduce((a, b) => a + b));                
+                durations = durations.map((elem, index) => durations.slice(0, index + 1).reduce((a, b) => a + b));
                 
-                let xPosVals = [posA[0]];
-                let yPosVals = [posA[1]];
-                let zPosVals = [posA[2]];
-                let hPosVals = [posA[3]];
-                let vPosVals = [posA[4]];
+                var xPosVals = [];
+                var yPosVals = [];
+                var zPosVals = [];
+                var hPosVals = [];
+                var vPosVals = [];
                 
-                for (let i = 0; i < midPos.length; i++) {
-                    xPosVals.push(midPos[i][0]);
-                    yPosVals.push(midPos[i][1]);
-                    zPosVals.push(midPos[i][2]);
-                    hPosVals.push(midPos[i][3]);
-                    vPosVals.push(midPos[i][4]);
+                for (let i = 0; i < positions.length; i++) {
+                    xPosVals.push(positions[i][0]);
+                    yPosVals.push(positions[i][1]);
+                    zPosVals.push(positions[i][2]);
+                    hPosVals.push(positions[i][3]);
+                    vPosVals.push(positions[i][4]);
                 }
-                
+
                 
                 // TODO: Jank fix, Cubic Interpolator needs at least 3 values, Akima needs 5 values, Use Linear is less
-                if (midPos.length == 0) {
+                if (positions.length == 2) {
                     
                     if (camera_mode == "bicubic") {
                         
                         durations.splice(1, 0, (durations[1] - durations[0]) / 2 + durations[0])
-                        xPosVals.push((posB[0] - posA[0]) / 2 + posA[0]);
-                        yPosVals.push((posB[1] - posA[1]) / 2 + posA[1]);
-                        zPosVals.push((posB[2] - posA[2]) / 2 + posA[2]);
-                        vPosVals.push((posB[4] - posA[4]) / 2 + posA[4]);
+                        xPosVals.splice(1, 0, (positions[1][0] - positions[0][0]) / 2 + positions[0][0]);
+                        yPosVals.splice(1, 0, (positions[1][1] - positions[0][1]) / 2 + positions[0][1]);
+                        zPosVals.splice(1, 0, (positions[1][2] - positions[0][2]) / 2 + positions[0][2]);
+                        vPosVals.splice(1, 0, (positions[1][4] - positions[0][4]) / 2 + positions[0][4]);
                         
                         // Fix rotation wrap issue
-                        if (Math.abs(posB[3] - posA[3]) < Math.PI) {
-                            hPosVals.push((posB[3] - posA[3]) / 2 + posA[3]);
-                        
-                        } else {
-                            if (posA[3] > posB[3]) {
-                                posB[3] += (2 * Math.PI);
+                        if (Math.abs(hPosVals[1] - hPosVals[0]) > Math.PI) {
+                            if (hPosVals[0] > hPosVals[1]) {
+                                hPosVals[1] += (2 * Math.PI);
                             } else {
-                                posA[3] += (2 * Math.PI);
+                                hPosVals[0] += (2 * Math.PI);
                             }
                         }
+                        
+                        hPosVals.splice(1, 0, (hPosVals[1] - hPosVals[0]) / 2 + hPosVals[0]);
                     }
                     
-                    if (midPos.length < 5 && camera_mode == "akima") {
+                    if (positions.length < 5 && camera_mode == "akima") {
                         // TODO: Use bicubic to reach 5 points. If starting with only 2, use linear then bicubic.
                         dew.notify("chat", { message: "Needs 5 positions for akima (Start, End and 3 intermediary/mid positions). WIP to fix that.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                         camera_end();
                         return;
                     }
                 }
-                
-                
-                xPosVals.push(posB[0]);
-                yPosVals.push(posB[1]);
-                zPosVals.push(posB[2]);
-                hPosVals.push(posB[3]);
-                vPosVals.push(posB[4]);
-                
+                                
                 
                 // Fix rotation wrap issue
                 for (let i = 1; i < hPosVals.length; i++) {
@@ -1146,8 +1055,7 @@ $(document).ready(function(){
                         }
                     }
                 }
-            
-            
+                
                 return {
                     durations: durations,
                     xPosVals: xPosVals,
@@ -1254,12 +1162,8 @@ $(document).ready(function(){
                 
                 durations = durations.map(n => n * 1000 * durations.length);
                 
-                var positions = [posA];
-                positions.push(...midPos);
-                
-                if (!loopCamera || (loopCamera && JSON.stringify(posA) != JSON.stringify(posB))) {
+                if (!loopCamera || (loopCamera && JSON.stringify(positions[0]) != JSON.stringify(positions[positions.length - 1]))) {
                     durations.push(durations[0]);
-                    positions.push(posB);
                 }
                 
                 cameraInterval = true;
