@@ -323,18 +323,7 @@ $(document).ready(function(){
                     pos_element_button_delete.textContent = "D";
                     pos_element_button_delete.style.marginLeft = "8px";
                     pos_element_button_delete.style.display = "inline-block";
-                    pos_element_button_delete.onclick = function(e) {
-                        if (confirm("Would you like to delete the following point ?: " + JSON.stringify(positions[i])) == true) {
-                            let removed = positions.splice(i, 1)[0];
-                            dew.notify("chat", { message: "Removed: [" + removed.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" }); 
-                            
-                            // Kinda have to close the list because it's not reactive and the indexes wouldn't line up after deleting one Element
-                            // TODO: Allow multiple deletions back to back when I'm not lazy
-                            dataWindowOpen = false;
-                            document.getElementById("camera_popup_id").outerHTML = "";
-                            chatboxHide();
-                        }
-                    };
+                    pos_element_button_delete.classList.add("positionDelete");
                 
                     tmp_pos_element.appendChild(pos_element_text);
                     tmp_pos_element.appendChild(pos_element_button_preview);
@@ -366,6 +355,19 @@ $(document).ready(function(){
                         positions.splice(oldIndex, 1);
                         positions.splice(newIndex, 0, tmp_element);
                     }
+                });
+                
+                
+                $(".positionDelete").click(function(){
+                    
+                    var id_to_delete = $(this).parent().index()
+                    
+                    if (confirm("Would you like to delete the following point ?: " + JSON.stringify(positions[id_to_delete])) == true) {
+                        let removed = positions.splice(id_to_delete, 1)[0];
+                        dew.notify("chat", { message: "Removed: [" + removed.map(function(v, i) { return (i <= 4) ? v.toFixed(3) : v; }) + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    }
+                    
+                    $(this).parent().remove();
                 });
                 
                 
