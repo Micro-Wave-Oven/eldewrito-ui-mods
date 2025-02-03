@@ -236,112 +236,112 @@ $(document).ready(function(){
                     return;
                 }
                 
-                let popup = document.createElement("div");
-                popup.id = "camera_popup_id";
-                
-                // General Appearance style
-                popup.style.background = "#142850";
-                popup.style.borderRadius = "4px";
-                popup.style.padding = "12px";
-                
-                // Popup style
-                popup.style.position = "absolute";
-                popup.style.width = "900px";
-                popup.style.height = "700px";
-                popup.style.maxHeight = "700px";
-                popup.style.top = "50%";
-                popup.style.left = "50%";
-                popup.style.margin = "-450px 0 0 -350px";
-                popup.style.overflowY = "auto";
-                
-                // Grid style
-                popup.style.display = "grid";
-                popup.style.gridTemplateColumns = "1fr";
-                popup.style.gridTemplateRows = "24px auto 24px";
-                popup.style.gridTemplateAreas = '"Title" "positions" "closeButton"';
-                popup.style.gridColumnGap = "0px";
-                popup.style.gridRowGap = "4px";
-                
-                
-                // Title
-                let popup_title = document.createElement("div");
-                popup_title.innerText = "Points Edit (Drag and Drop to rearrange)";
-                popup_title.style.color = "white";
-                popup_title.style.textAlign = "center";
-                popup_title.style.gridArea = "Title";
-                popup_title.style.textDecoration = "underline"; 
-                
-                // Close Button
-                let popup_close_button = document.createElement("button");
-                popup_close_button.id = "popup_close_button2";
-                popup_close_button.textContent = "Close";
-                popup_close_button.style.gridArea = "closeButton";
-                popup_close_button.style.display = "block";
-                popup_close_button.onclick = function() {
-                    dataWindowOpen = false;
-                    document.getElementById("camera_popup_id").outerHTML = "";
-                    chatboxHide();
-                };
-                
-                // Positions
-                let positions_element = document.createElement("div");
-                positions_element.classList.add("sortableList");
-                positions_element.style.textAlign = "center";
-                positions_element.style.gridArea = "positions";
-                
-                for (let i = 0; i < positions.length; i++) {
-                    let tmp_pos_element = document.createElement("div");
-                    tmp_pos_element.id = "camera_edit_list_position_" + i;
-                    
-                    tmp_pos_element.style.textAlign = "center";
-                    tmp_pos_element.style.color = "white";
-                    tmp_pos_element.style.paddingTop = "4px";
-                    tmp_pos_element.style.border = "1px solid white";
-                    tmp_pos_element.style.borderRadius = "4px";
-                    tmp_pos_element.style.marginTop = "2px";
-                    
-                    let pos_element_text = document.createElement("div");
-                    pos_element_text.innerText = "X: " + positions[i][0] + " Y: " + positions[i][1] + " Z: " + positions[i][2] + " H: " + positions[i][3] + " V: " + positions[i][4] + ((positions[i].length > 5) ? " Comment: " + positions[i][5]: "");
-                    pos_element_text.style.display = "inline-block";
-                    
-                    let pos_element_button_preview = document.createElement("button");
-                    pos_element_button_preview.textContent = "P";
-                    pos_element_button_preview.style.marginLeft = "8px";
-                    pos_element_button_preview.style.display = "inline-block";
-                    pos_element_button_preview.onclick = function(e) {                        
-                        dew.notify("chat", { message: "Previewing position: [" + positions[i] + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        dew.notify("chat", { message: "Press Escape to leave", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                // Create the popup
+                $("<div/>")
+                    .attr('id', 'camera_popup_id')
+                    .css({
+                        // General Appearance
+                        "background": "#142850",
+                        "border-radius": "4px",
+                        "padding": "12px",
                         
-                        dew.command("Camera.Mode static");
-                        dew.command("Camera.Position " + positions[i][0] + " " + positions[i][1] + " " + positions[i][2] + " " + positions[i][3] + " " + positions[i][4]);
+                        // Centered Div
+                        "position": "absolute",
+                        "width": "900px",
+                        "height": "700px",
+                        "top": "50%",
+                        "left": "50%",
+                        "margin": "-350px 0 0 -350px",
                         
-                        previewingPos = true;
-                        document.getElementById("camera_popup_id").style.visibility = "hidden";
-                    };
-                    
-                    let pos_element_button_delete = document.createElement("button");
-                    pos_element_button_delete.textContent = "D";
-                    pos_element_button_delete.style.marginLeft = "8px";
-                    pos_element_button_delete.style.display = "inline-block";
-                    pos_element_button_delete.classList.add("positionDelete");
+                        // Grid Aspect
+                        "display": "grid",
+                        "grid-template-columns": "1fr",
+                        "grid-template-rows": "24px auto 24px",
+                        "grid-template-areas": '"Title" "Positions" "Exit"',
+                        "grid-column-gap": "0px",
+                        "grid-row-gap": "4px",
+                    })
+                    .append([
+                        // Popup Title
+                        $('<div/>')
+                            .text("Points Edit (Drag and Drop to rearrange)")
+                            .css({
+                                "color": "white",
+                                "text-align": "center",
+                                "grid-area": "Title",
+                                "text-decoration": "underline"
+                            }),
+                        
+                        // Positions List
+                        $('<div/>')
+                            .addClass("sortableList")
+                            .css({
+                                "grid-area": "Positions",
+                                "text-align": "center",
+                            }),
+                        
+                        // Close Button
+                        $('<button/>')
+                            .attr('id', 'popup_close_button2')
+                            .html("Close")
+                            .css({"grid-area": "Exit"})
+                            .click(function() {
+                                dataWindowOpen = false;
+                                document.getElementById("camera_popup_id").outerHTML = "";
+                                chatboxHide();
+                            })
+                    ])
+                    .appendTo("body");
                 
-                    tmp_pos_element.appendChild(pos_element_text);
-                    tmp_pos_element.appendChild(pos_element_button_preview);
-                    tmp_pos_element.appendChild(pos_element_button_delete);
-                    
-                    positions_element.appendChild(tmp_pos_element);
-                }
+                // Add the points
+                $.each(positions, function(i, value) {
+                    $("<div/>")
+                        .css({
+                            "text-align": "center",
+                            "color": "white",
+                            "padding-top": "4px",
+                            "border": "1px solid white",
+                            "border-radius": "4px",
+                            "margin-top": "2px",
+                        })
+                        .append([
+                            // Value
+                            $("<div/>")
+                                .css({"display": "inline-block"})
+                                .html("X: " + value[0] + " Y: " + value[1] + " Z: " + value[2] + " H: " + value[3] + " V: " + value[4] + ((value.length > 5) ? " Comment: " + value[5]: "")),
+                            
+                            // Preview Button
+                            $("<button/>")
+                                .css({
+                                    "display": "inline-block",
+                                    "margin-left": "8px",
+                                })
+                                .html("P")
+                                .click(function() {
+                                    dew.notify("chat", { message: "Previewing position: [" + value + "]", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                                    dew.notify("chat", { message: "Press Escape to leave", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                                    
+                                    dew.command("Camera.Mode static");
+                                    dew.command("Camera.Position " + value[0] + " " + value[1] + " " + value[2] + " " + value[3] + " " + value[4]);
+                                    
+                                    previewingPos = true;
+                                    document.getElementById("camera_popup_id").style.visibility = "hidden"; 
+                                }),
+                            
+                            // Delete Button
+                            $("<button/>")
+                                .addClass("positionDelete")
+                                .css({
+                                    "display": "inline-block",
+                                    "margin-left": "8px",
+                                })
+                                .html("X")
+                        ])
+                        .appendTo(".sortableList");
+                });
                 
-                // Add elements to the popup
-                popup.appendChild(popup_title);
-                popup.appendChild(positions_element);
-                popup.appendChild(popup_close_button);
                 
-                // Add popup to page
-                document.body.appendChild(popup);
-                
-                
-                
+                // Make it Drag and Drop rearrageable
                 $('.sortableList').sortable({
                     start: function(e, ui) {
                         $(this).attr('data-old-index', ui.item.index());
@@ -357,9 +357,8 @@ $(document).ready(function(){
                     }
                 });
                 
-                
+                // Delete point click event
                 $(".positionDelete").click(function(){
-                    
                     var id_to_delete = $(this).parent().index()
                     
                     if (confirm("Would you like to delete the following point ?: " + JSON.stringify(positions[id_to_delete])) == true) {
@@ -430,91 +429,86 @@ $(document).ready(function(){
                 };
                 data = JSON.stringify(data, null, 4);
                 
-                let popup = document.createElement("div");
-                popup.id = "camera_popup_id";
                 
-                // General Appearance style
-                popup.style.background = "#142850";
-                popup.style.borderRadius = "4px";
-                popup.style.padding = "12px";
-                
-                // Popup style
-                popup.style.position = "absolute";
-                popup.style.width = "700px";
-                popup.style.height = "700px";
-                popup.style.top = "50%";
-                popup.style.left = "50%";
-                popup.style.margin = "-350px 0 0 -350px";
-                
-                // Grid style
-                popup.style.display = "grid";
-                popup.style.gridTemplateColumns = "1fr 1fr";
-                popup.style.gridTemplateRows = "24px auto 24px";
-                popup.style.gridTemplateAreas = '"Title Title" "TextArea TextArea" "Exit Save"';
-                popup.style.gridColumnGap = "0px";
-                popup.style.gridRowGap = "4px";
-                
-                
-                let popup_title = document.createElement("div");
-                popup_title.innerText = "Import/Export: Copy/Paste/CTRL + (A/Z)/Keyboard only";
-                popup_title.style.color = "white";
-                popup_title.style.textAlign = "center";
-                popup_title.style.gridArea = "Title";
-                popup_title.style.textDecoration = "underline"; 
-                
-                let popup_textarea = document.createElement("textarea");
-                popup_textarea.id = "camera_popup_textarea_id";
-                popup_textarea.value = data;
-                popup_textarea.style.gridArea = "TextArea";
-                
-                let popup_close_button = document.createElement("button");
-                popup_close_button.textContent = "Import and Close";
-                popup_close_button.style.gridArea = "Save";
-                popup_close_button.onclick = function(e) {
-                    
-                    try {
-                        var parsedData = JSON.parse(document.getElementById("camera_popup_textarea_id").value);
-                        if (Object.hasOwn(parsedData, 'positions')) {
-                            positions = parsedData.positions;
-                        }
+                $("<div/>")
+                    .attr('id', 'camera_popup_id')
+                    .css({
+                        // General Appearance
+                        "background": "#142850",
+                        "border-radius": "4px",
+                        "padding": "12px",
                         
-                        // Support for old exports
-                        if (Object.hasOwn(parsedData, 'start')) {
-                            positions = [];
-                            positions.push(parsedData.start);
-                            if (Object.hasOwn(parsedData, 'midPoints')) {
-                                positions = positions.concat(parsedData.midPoints);
-                            }
-                            if (Object.hasOwn(parsedData, 'end')) {
-                                positions.push(parsedData.end);
-                            }
-                        }
+                        // Centered Div
+                        "position": "absolute",
+                        "width": "700px",
+                        "height": "700px",
+                        "top": "50%",
+                        "left": "50%",
+                        "margin": "-350px 0 0 -350px",
                         
-                    } catch (e) {
-                        dew.notify("chat", { message: "Error parsing data: " + e.toString(), sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                    }
-                    
-                    dataWindowOpen = false;
-                    document.getElementById("camera_popup_id").outerHTML = "";
-                    chatboxHide();
-                };
-                
-                let popup_close_button2 = document.createElement("button");
-                popup_close_button2.id = "popup_close_button2";
-                popup_close_button2.textContent = "Close without importing";
-                popup_close_button2.style.gridArea = "Exit";
-                popup_close_button2.onclick = function() {
-                    dataWindowOpen = false;
-                    document.getElementById("camera_popup_id").outerHTML = "";
-                    chatboxHide();
-                };
-                
-                
-                popup.appendChild(popup_title);
-                popup.appendChild(popup_textarea);
-                popup.appendChild(popup_close_button);
-                popup.appendChild(popup_close_button2);
-                document.body.appendChild(popup);
+                        // Grid Aspect
+                        "display": "grid",
+                        "grid-template-columns": "1fr 1fr",
+                        "grid-template-rows": "24px auto 24px",
+                        "grid-template-areas": '"Title Title" "TextArea TextArea" "Exit Save"',
+                        "grid-column-gap": "0px",
+                        "grid-row-gap": "4px",
+                    })
+                    .append([
+                        $('<div/>')
+                            .text("Import/Export: Copy/Paste/CTRL + (A/Z)/Keyboard only")
+                            .css({
+                                "color": "white",
+                                "text-align": "center",
+                                "grid-area": "Title",
+                                "text-decoration": "underline"
+                            }),
+                            
+                        $('<textarea/>')
+                            .attr('id', 'camera_popup_textarea_id')
+                            .val(data)
+                            .css({"grid-area": "TextArea"}),
+                            
+                        $('<button/>')
+                            .html("Import and Close")
+                            .css({"grid-area": "Save"})
+                            .click(function() {
+                                try {
+                                    var parsedData = JSON.parse(document.getElementById("camera_popup_textarea_id").value);
+                                    if (Object.hasOwn(parsedData, 'positions')) {
+                                        positions = parsedData.positions;
+                                    }
+                                    // Support for old exports
+                                    if (Object.hasOwn(parsedData, 'start')) {
+                                        positions = [];
+                                        positions.push(parsedData.start);
+                                        if (Object.hasOwn(parsedData, 'midPoints')) {
+                                            positions = positions.concat(parsedData.midPoints);
+                                        }
+                                        if (Object.hasOwn(parsedData, 'end')) {
+                                            positions.push(parsedData.end);
+                                        }
+                                    }
+                                    dew.notify("chat", { message: "Import successful", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                                } catch (e) {
+                                    dew.notify("chat", { message: "Error parsing data: " + e.toString(), sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                                }
+                                dataWindowOpen = false;
+                                document.getElementById("camera_popup_id").outerHTML = "";
+                                chatboxHide();
+                            }),
+                            
+                        $('<button/>')
+                            .attr('id', 'popup_close_button2')
+                            .html("Close without importing")
+                            .css({"grid-area": "Exit"})
+                            .click(function() {
+                                dataWindowOpen = false;
+                                document.getElementById("camera_popup_id").outerHTML = "";
+                                chatboxHide();
+                            })
+                    ])
+                    .appendTo("body");
                 
                 dataWindowOpen = true;
                 
