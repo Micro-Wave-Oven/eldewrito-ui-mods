@@ -307,6 +307,7 @@ $(document).ready(function(){
                         .append([
                             // Value
                             $("<div/>")
+                                .addClass("positionText")
                                 .css({"display": "inline-block"})
                                 .html("X: " + value[0] + " Y: " + value[1] + " Z: " + value[2] + " H: " + value[3] + " V: " + value[4] + ((value.length > 5) ? " Comment: " + value[5]: "")),
                             
@@ -326,6 +327,28 @@ $(document).ready(function(){
                                     
                                     previewingPos = true;
                                     document.getElementById("camera_popup_id").style.visibility = "hidden"; 
+                                }),
+                            
+                            // Rename Button
+                            $("<button/>")
+                                .css({
+                                    "display": "inline-block",
+                                    "margin-left": "8px",
+                                })
+                                .html("R")
+                                .click(function() {
+                                    var id_to_rename = $(this).parent().index();
+                                    let new_text = prompt("Enter the new name/comment for this position: " + positions[id_to_rename]);
+                                    if (new_text != null && new_text != "") {
+                                        if (positions[id_to_rename].length == 5) {
+                                            positions[id_to_rename].push(new_text);
+                                        } else {
+                                            positions[id_to_rename][5] = new_text;
+                                        }
+                                        $(this).parent()
+                                            .find("div.positionText")
+                                            .html("X: " + positions[id_to_rename][0] + " Y: " + positions[id_to_rename][1] + " Z: " + positions[id_to_rename][2] + " H: " + positions[id_to_rename][3] + " V: " + positions[id_to_rename][4] + ((positions[id_to_rename].length > 5) ? " Comment: " + positions[id_to_rename][5]: ""));
+                                    }
                                 }),
                             
                             // Delete Button
