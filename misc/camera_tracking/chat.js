@@ -244,6 +244,7 @@ $(document).ready(function(){
                         "background": "#142850",
                         "border-radius": "4px",
                         "padding": "12px",
+                        "overflow-y": "auto",
                         
                         // Centered Div
                         "position": "absolute",
@@ -560,8 +561,10 @@ $(document).ready(function(){
                     dew.notify("chat", { message: " /camera 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " /camera <b/bi/bicubic> 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " /camera <sb/sbi/smooth_bicubic> 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " /camera <a/ak/aki/akima> 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " /camera <sa/sak/saki/smooth_akima> 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " /camera <l/lerp/linear> 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: " /camera <l/lerp/linear> dur 4 4 2", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
@@ -587,11 +590,26 @@ $(document).ready(function(){
                         curr_command.shift();
                         break;
                     
+                    case "sb":
+                    case "sbi":
+                    case "smooth_bicubic":
+                        mode = "smooth_bicubic";
+                        curr_command.shift();
+                        break;
+                    
                     case "a":
                     case "ak":
                     case "aki":
                     case "akima":
                         mode = "akima";
+                        curr_command.shift();
+                        break;
+                    
+                    case "sa":
+                    case "sak":
+                    case "saki":
+                    case "smooth_akima":
+                        mode = "smooth_akima";
                         curr_command.shift();
                         break;
                         
@@ -656,11 +674,72 @@ $(document).ready(function(){
                         bicubic_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
                         break;
                         
+                    case "smooth_bicubic":
+                        {
+                            vals = prep_values_bicubic_akima(durations, mode);
+                            
+                            
+                            let duration = durations.reduce((partialSum, a) => partialSum + a, 0);
+                            
+                            let per_track_distance = [];
+                            let total_distance = 0;
+                            for (let i = 0; i < (vals.xPosVals.length - 1); i++) {
+                                let curr_distance = Math.sqrt(Math.pow((vals.xPosVals[i + 1] - vals.xPosVals[i]), 2) + Math.pow((vals.yPosVals[i + 1] - vals.yPosVals[i]), 2) + Math.pow((vals.zPosVals[i + 1] - vals.zPosVals[i]), 2));
+                                per_track_distance.push(curr_distance);
+                                total_distance += curr_distance;
+                            }
+                            
+                            let per_track_duration = [];
+                            for (let i = 0; i < per_track_distance.length; i++) {
+                                let curr_duration = (per_track_distance[i] / total_distance) * duration;
+                                per_track_duration.push(curr_duration);
+                            }
+                            
+                            // Durations will be the x axis values for each point in time
+                            per_track_duration = per_track_duration.map(x => x * 1000);
+                            per_track_duration.unshift(0);
+                            per_track_duration = per_track_duration.map((elem, index) => per_track_duration.slice(0, index + 1).reduce((a, b) => a + b));
+                            
+                            
+                            bicubic_camera(per_track_duration, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
+                            break;
+                        }
+                        
                     case "akima":
                         vals = prep_values_bicubic_akima(durations, mode);
                         akima_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
                         break;
-                    
+                        
+                    case "smooth_akima":
+                        {
+                            vals = prep_values_bicubic_akima(durations, mode);
+                            
+                            
+                            let duration = durations.reduce((partialSum, a) => partialSum + a, 0);
+                            
+                            let per_track_distance = [];
+                            let total_distance = 0;
+                            for (let i = 0; i < (vals.xPosVals.length - 1); i++) {
+                                let curr_distance = Math.sqrt(Math.pow((vals.xPosVals[i + 1] - vals.xPosVals[i]), 2) + Math.pow((vals.yPosVals[i + 1] - vals.yPosVals[i]), 2) + Math.pow((vals.zPosVals[i + 1] - vals.zPosVals[i]), 2));
+                                per_track_distance.push(curr_distance);
+                                total_distance += curr_distance;
+                            }
+                            
+                            let per_track_duration = [];
+                            for (let i = 0; i < per_track_distance.length; i++) {
+                                let curr_duration = (per_track_distance[i] / total_distance) * duration;
+                                per_track_duration.push(curr_duration);
+                            }
+                            
+                            // Durations will be the x axis values for each point in time
+                            per_track_duration = per_track_duration.map(x => x * 1000);
+                            per_track_duration.unshift(0);
+                            per_track_duration = per_track_duration.map((elem, index) => per_track_duration.slice(0, index + 1).reduce((a, b) => a + b));
+                            
+                            
+                            akima_camera(per_track_duration, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
+                        }
+                        
                     case "linear":
                         lerp_camera(durations);
                         break;
