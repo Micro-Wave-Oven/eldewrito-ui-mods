@@ -580,6 +580,7 @@ $(document).ready(function(){
                     return;
                 }
                 
+                // Parse camera mode
                 var mode = "bicubic"; //default mode
                 switch (curr_command[0]) {
                     
@@ -631,6 +632,7 @@ $(document).ready(function(){
                 }
                 
                 
+                // Parse duration(s)
                 var durations = [];
                 var customDurationsEnabled = (positions.length > 2) && (curr_command[0] == "dur");
                 
@@ -656,15 +658,21 @@ $(document).ready(function(){
                     return;
                 }
                 
+                
                 loopCamera = curr_command[curr_command.length - 1] == "l" || curr_command[curr_command.length - 1] == "loop";
                 
+                
+                $("#chatBox").val('');
                 document.getElementById("chat").style.display = "none";
                 dew.command("Camera.Mode static");
                 
-                $("#chatBox").val('');
                 
+                // Clear up existing running animation just in case
+                clearInterval(cameraInterval);
+                cameraInterval = undefined;
                 animationPaused = false;
                 pauseStartTime = 0;
+                
                 
                 let vals = 0;
                 
@@ -675,35 +683,10 @@ $(document).ready(function(){
                         break;
                         
                     case "smooth_bicubic":
-                        {
-                            vals = prep_values_bicubic_akima(durations, mode);
-                            
-                            
-                            let duration = durations.reduce((partialSum, a) => partialSum + a, 0);
-                            
-                            let per_track_distance = [];
-                            let total_distance = 0;
-                            for (let i = 0; i < (vals.xPosVals.length - 1); i++) {
-                                let curr_distance = Math.sqrt(Math.pow((vals.xPosVals[i + 1] - vals.xPosVals[i]), 2) + Math.pow((vals.yPosVals[i + 1] - vals.yPosVals[i]), 2) + Math.pow((vals.zPosVals[i + 1] - vals.zPosVals[i]), 2));
-                                per_track_distance.push(curr_distance);
-                                total_distance += curr_distance;
-                            }
-                            
-                            let per_track_duration = [];
-                            for (let i = 0; i < per_track_distance.length; i++) {
-                                let curr_duration = (per_track_distance[i] / total_distance) * duration;
-                                per_track_duration.push(curr_duration);
-                            }
-                            
-                            // Durations will be the x axis values for each point in time
-                            per_track_duration = per_track_duration.map(x => x * 1000);
-                            per_track_duration.unshift(0);
-                            per_track_duration = per_track_duration.map((elem, index) => per_track_duration.slice(0, index + 1).reduce((a, b) => a + b));
-                            
-                            
-                            bicubic_camera(per_track_duration, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
-                            break;
-                        }
+                        vals = prep_values_bicubic_akima(durations, mode);
+                        durations = normalise_durations(durations, vals);
+                        bicubic_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
+                        break;
                         
                     case "akima":
                         vals = prep_values_bicubic_akima(durations, mode);
@@ -711,34 +694,10 @@ $(document).ready(function(){
                         break;
                         
                     case "smooth_akima":
-                        {
-                            vals = prep_values_bicubic_akima(durations, mode);
-                            
-                            
-                            let duration = durations.reduce((partialSum, a) => partialSum + a, 0);
-                            
-                            let per_track_distance = [];
-                            let total_distance = 0;
-                            for (let i = 0; i < (vals.xPosVals.length - 1); i++) {
-                                let curr_distance = Math.sqrt(Math.pow((vals.xPosVals[i + 1] - vals.xPosVals[i]), 2) + Math.pow((vals.yPosVals[i + 1] - vals.yPosVals[i]), 2) + Math.pow((vals.zPosVals[i + 1] - vals.zPosVals[i]), 2));
-                                per_track_distance.push(curr_distance);
-                                total_distance += curr_distance;
-                            }
-                            
-                            let per_track_duration = [];
-                            for (let i = 0; i < per_track_distance.length; i++) {
-                                let curr_duration = (per_track_distance[i] / total_distance) * duration;
-                                per_track_duration.push(curr_duration);
-                            }
-                            
-                            // Durations will be the x axis values for each point in time
-                            per_track_duration = per_track_duration.map(x => x * 1000);
-                            per_track_duration.unshift(0);
-                            per_track_duration = per_track_duration.map((elem, index) => per_track_duration.slice(0, index + 1).reduce((a, b) => a + b));
-                            
-                            
-                            akima_camera(per_track_duration, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
-                        }
+                        vals = prep_values_bicubic_akima(durations, mode);
+                        durations = normalise_durations(durations, vals);
+                        akima_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
+                        break;
                         
                     case "linear":
                         lerp_camera(durations);
@@ -757,6 +716,33 @@ $(document).ready(function(){
                 return;
             }
             
+            
+            function normalise_durations(durations, vals) {
+                
+                let duration = durations.reduce((partialSum, a) => partialSum + a, 0);
+                
+                let per_track_distance = [];
+                let total_distance = 0;
+                for (let i = 0; i < (vals.xPosVals.length - 1); i++) {
+                    let curr_distance = Math.sqrt(Math.pow((vals.xPosVals[i + 1] - vals.xPosVals[i]), 2) + Math.pow((vals.yPosVals[i + 1] - vals.yPosVals[i]), 2) + Math.pow((vals.zPosVals[i + 1] - vals.zPosVals[i]), 2));
+                    per_track_distance.push(curr_distance);
+                    total_distance += curr_distance;
+                }
+                
+                let per_track_duration = [];
+                for (let i = 0; i < per_track_distance.length; i++) {
+                    let curr_duration = (per_track_distance[i] / total_distance) * duration;
+                    per_track_duration.push(curr_duration);
+                }
+                
+                // Durations will be the x axis values for each point in time
+                per_track_duration = per_track_duration.map(x => x * 1000);
+                per_track_duration.unshift(0);
+                per_track_duration = per_track_duration.map((elem, index) => per_track_duration.slice(0, index + 1).reduce((a, b) => a + b));
+                
+                return per_track_duration;
+            }
+            
             function camera_end() {
                 clearInterval(cameraInterval);
                 cameraInterval = undefined;
@@ -768,105 +754,8 @@ $(document).ready(function(){
                 }, 2000);
             }
             
-            function lerp_camera(durations) {
-                
-                var timeValue = durations.reduce((a, b) => a + b, 0);
-                var timeInMs = timeValue * 1000;
-                var nbTracks = positions.length - 1;
-                
-                // TODO: Shouldn't need to use steps at all, just time values, might improve
-                var steps = parseInt(timeInMs / cameraIntervalMs);
-                steps = steps + (nbTracks - (steps % nbTracks)) - nbTracks;
-
-                durations = durations.map(x => x * 1000);
-                
-                var trackSizes = durations.map(x => x / cameraIntervalMs);
-                trackSizes = trackSizes.map((elem, index) => trackSizes.slice(0, index + 1).reduce((a, b) => a + b));
-                
-                
-                currentStep = 0;
-                
-                var prevTrack = 0;
-                var tempPosA = positions[0];
-                var tempPosB = positions[1];
-                
-                // Fix potential rotation wrap issue
-                if (Math.abs(tempPosA[3] - tempPosB[3]) > Math.PI) {
-                    if (tempPosA[3] > tempPosB[3]) {
-                        tempPosB[3] += (2 * Math.PI);
-                    } else {
-                        tempPosA[3] += (2 * Math.PI);
-                    }
-                }
-                
-                setTimeout(function() {
-                
-                    startTime = performance.now();
-                    
-                    cameraInterval = setInterval(function() {
-                        
-                        if (animationPaused) {
-                            return;
-                        }
-                        
-                        var currTrack = trackSizes.findIndex((v, i) => currentStep <= v);
-                        if (currTrack == -1) {
-                            console.log("currTrack == -1");
-                        }
-                        
-                        // Changed track, update start and end positions of track
-                        if (currTrack != prevTrack) {
-                            
-                            prevTrack = currTrack;
-                            
-                            startTime = performance.now();
-                            
-                            
-                            tempPosA = positions[currTrack];
-                            tempPosB = positions[currTrack + 1];
-                
-                            // Fix potential rotation wrap issue
-                            if (Math.abs(tempPosA[3] - tempPosB[3]) > Math.PI) {
-                                if (tempPosA[3] > tempPosB[3]) {
-                                    tempPosB[3] += (2 * Math.PI);
-                                } else {
-                                    tempPosA[3] += (2 * Math.PI);
-                                }
-                            }
-                            
-                            // TODO: Skip step since it's not the first track and you don't want to repeat a move.
-                            // Though tbf it's only a ~5ms stop but might as well
-                        }
-                        
-                        var progress = (performance.now() - startTime) / durations[currTrack];
-                        
-                        var posX = progress * (tempPosB[0] - tempPosA[0]) + tempPosA[0];
-                        var posY = progress * (tempPosB[1] - tempPosA[1]) + tempPosA[1];
-                        var posZ = progress * (tempPosB[2] - tempPosA[2]) + tempPosA[2];
-                        var posH = progress * (tempPosB[3] - tempPosA[3]) + tempPosA[3];
-                        var posV = progress * (tempPosB[4] - tempPosA[4]) + tempPosA[4];
-                        
-                        dew.command("Camera.Position " + posX + " " + posY + " " + posZ + " " + posH + " " + posV);
-                        
-                        currentStep++;
-                        
-                        if (currentStep >= steps) {
-                            if (!loopCamera) {
-                                camera_end();
-                            } else {
-                                startTime = performance.now();
-                            }
-                        }
-                        
-                    }, cameraIntervalMs);
-                    
-                }, 1000);
-                
-                return;
-            }
-
-
-
+            
+            // Auxiliary functions needed for cubic/akima cameras
             // Source: https://github.com/chdh/commons-math-interpolation
             function binarySearch(a, key) {
                 let low = 0;
@@ -1065,6 +954,7 @@ $(document).ready(function(){
             }
             
             
+            // Fixes positions values before being sent to the camera animation
             function prep_values_bicubic_akima(durations, camera_mode) {
                 
                 var timeValue = durations.reduce((a, b) => a + b, 0);
@@ -1255,6 +1145,103 @@ $(document).ready(function(){
                 
             }
 
+            
+            function lerp_camera(durations) {
+                
+                var timeValue = durations.reduce((a, b) => a + b, 0);
+                var timeInMs = timeValue * 1000;
+                var nbTracks = positions.length - 1;
+                
+                // TODO: Shouldn't need to use steps at all, just time values, might improve
+                var steps = parseInt(timeInMs / cameraIntervalMs);
+                steps = steps + (nbTracks - (steps % nbTracks)) - nbTracks;
+
+                durations = durations.map(x => x * 1000);
+                
+                var trackSizes = durations.map(x => x / cameraIntervalMs);
+                trackSizes = trackSizes.map((elem, index) => trackSizes.slice(0, index + 1).reduce((a, b) => a + b));
+                
+                
+                currentStep = 0;
+                
+                var prevTrack = 0;
+                var tempPosA = positions[0];
+                var tempPosB = positions[1];
+                
+                // Fix potential rotation wrap issue
+                if (Math.abs(tempPosA[3] - tempPosB[3]) > Math.PI) {
+                    if (tempPosA[3] > tempPosB[3]) {
+                        tempPosB[3] += (2 * Math.PI);
+                    } else {
+                        tempPosA[3] += (2 * Math.PI);
+                    }
+                }
+                
+                setTimeout(function() {
+                
+                    startTime = performance.now();
+                    
+                    cameraInterval = setInterval(function() {
+                        
+                        if (animationPaused) {
+                            return;
+                        }
+                        
+                        var currTrack = trackSizes.findIndex((v, i) => currentStep <= v);
+                        if (currTrack == -1) {
+                            console.log("currTrack == -1");
+                        }
+                        
+                        // Changed track, update start and end positions of track
+                        if (currTrack != prevTrack) {
+                            
+                            prevTrack = currTrack;
+                            
+                            startTime = performance.now();
+                            
+                            
+                            tempPosA = positions[currTrack];
+                            tempPosB = positions[currTrack + 1];
+                
+                            // Fix potential rotation wrap issue
+                            if (Math.abs(tempPosA[3] - tempPosB[3]) > Math.PI) {
+                                if (tempPosA[3] > tempPosB[3]) {
+                                    tempPosB[3] += (2 * Math.PI);
+                                } else {
+                                    tempPosA[3] += (2 * Math.PI);
+                                }
+                            }
+                            
+                            // TODO: Skip step since it's not the first track and you don't want to repeat a move.
+                            // Though tbf it's only a ~5ms stop but might as well
+                        }
+                        
+                        var progress = (performance.now() - startTime) / durations[currTrack];
+                        
+                        var posX = progress * (tempPosB[0] - tempPosA[0]) + tempPosA[0];
+                        var posY = progress * (tempPosB[1] - tempPosA[1]) + tempPosA[1];
+                        var posZ = progress * (tempPosB[2] - tempPosA[2]) + tempPosA[2];
+                        var posH = progress * (tempPosB[3] - tempPosA[3]) + tempPosA[3];
+                        var posV = progress * (tempPosB[4] - tempPosA[4]) + tempPosA[4];
+                        
+                        dew.command("Camera.Position " + posX + " " + posY + " " + posZ + " " + posH + " " + posV);
+                        
+                        currentStep++;
+                        
+                        if (currentStep >= steps) {
+                            if (!loopCamera) {
+                                camera_end();
+                            } else {
+                                startTime = performance.now();
+                            }
+                        }
+                        
+                    }, cameraIntervalMs);
+                    
+                }, 1000);
+                
+                return;
+            }
             
             function step_camera(durations, loopCamera) {
                 
