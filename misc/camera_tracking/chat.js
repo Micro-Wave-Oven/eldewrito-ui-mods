@@ -27,6 +27,18 @@ var cachedPlayerJSON;
 
 
 // Auto Camera Tracking
+const CAMERA_MODE = {
+    NONE: "none",
+    LINEAR: "linear",
+    BICUBIC: "bicubic",
+    SMOOTH_BICUBIC: "smooth_bicubic",
+    AKIMA: "akima",
+    SMOOTH_AKIMA: "smooth_akima",
+    STEP: "step",
+    DIRECTOR: "director",
+};
+var currentMode = CAMERA_MODE.NONE;
+
 var positions = [];
 
 var currentStep = 0;
@@ -37,6 +49,8 @@ var startTime = 0;
 var animationPaused = false;
 var pauseStartTime = 0;
 var loopCamera = false;
+
+var currentPosition = 0;
 
 var dataWindowOpen = false;
 var previewingPos = false;
@@ -52,7 +66,7 @@ $.ajax({
 
 $(document).ready(function(){
     $(document).keyup(function (e) {
-        if (e.keyCode === 27) {
+        if (e.keyCode === 27) { // Escape Key
             
             if (cameraInterval != undefined) {
                 
@@ -95,7 +109,25 @@ $(document).ready(function(){
         }
     });
     
-    $("html").on("keydown", function(e){ //Pause animation if playing
+    $("html").on("keydown", function(e){
+    
+        if(currentMode == CAMERA_MODE.DIRECTOR) {
+            
+            if (e.keyCode <= 57 && e.keyCode >= 48) {
+                currentPosition = (e.keyCode - 48);
+                
+                // Shift the position so that 1 thru 9 and 0 on they keyboard equals 0 - 9 in value
+                if (currentPosition == 0) {
+                    currentPosition = 10;
+                }
+                currentPosition -= 1;
+                
+                if (currentPosition < positions.length) {
+                    dew.command("Camera.Position " + positions[currentPosition][0] + " " + positions[currentPosition][1] + " " + positions[currentPosition][2] + " " + positions[currentPosition][3] + " " + positions[currentPosition][4]);
+                }
+            }
+        }
+        
         if(e.keyCode == 80 && cameraInterval != undefined){ //P
         
             animationPaused = !animationPaused;
@@ -128,7 +160,7 @@ $(document).ready(function(){
             
             if (cameraInterval != undefined) {
                 return;
-            }            
+            }
             
             
             // Auto Camera Tracking Commands
@@ -570,6 +602,8 @@ $(document).ready(function(){
                     dew.notify("chat", { message: " /camera <l/lerp/linear> dur 4 4 2", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " /camera <p/pause> <10 | dur 1 ...>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    
+                    dew.notify("chat", { message: " /camera <d/dir/director>", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     chatboxHide();
                     return;
                 }
@@ -581,20 +615,19 @@ $(document).ready(function(){
                 }
                 
                 // Parse camera mode
-                var mode = "bicubic"; //default mode
                 switch (curr_command[0]) {
                     
                     case "b":
                     case "bi":
                     case "bicubic":
-                        mode = "bicubic";
+                        currentMode = CAMERA_MODE.BICUBIC;
                         curr_command.shift();
                         break;
                     
                     case "sb":
                     case "sbi":
                     case "smooth_bicubic":
-                        mode = "smooth_bicubic";
+                        currentMode = CAMERA_MODE.SMOOTH_BICUBIC;
                         curr_command.shift();
                         break;
                     
@@ -602,7 +635,7 @@ $(document).ready(function(){
                     case "ak":
                     case "aki":
                     case "akima":
-                        mode = "akima";
+                        currentMode = CAMERA_MODE.AKIMA;
                         curr_command.shift();
                         break;
                     
@@ -610,20 +643,27 @@ $(document).ready(function(){
                     case "sak":
                     case "saki":
                     case "smooth_akima":
-                        mode = "smooth_akima";
+                        currentMode = CAMERA_MODE.SMOOTH_AKIMA;
                         curr_command.shift();
                         break;
                         
                     case "l":
                     case "lerp":
                     case "linear":
-                        mode = "linear";
+                        currentMode = CAMERA_MODE.LINEAR;
                         curr_command.shift();
                         break;
                         
                     case "p":
                     case "pause":
-                        mode = "pause";
+                        currentMode = CAMERA_MODE.STEP;
+                        curr_command.shift();
+                        break;
+                        
+                    case "d":
+                    case "dir":
+                    case "director":
+                        currentMode = CAMERA_MODE.DIRECTOR;
                         curr_command.shift();
                         break;
                     
@@ -636,7 +676,7 @@ $(document).ready(function(){
                 var durations = [];
                 var customDurationsEnabled = (positions.length > 2) && (curr_command[0] == "dur");
                 
-                if (!customDurationsEnabled && (isNaN(curr_command[0]) || !isFinite(curr_command[0])) ) {
+                if (currentMode != CAMERA_MODE.DIRECTOR && !customDurationsEnabled && (isNaN(curr_command[0]) || !isFinite(curr_command[0])) ) {
                     dew.notify("chat", { message: "Duration needs to be a number", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     chatboxHide();
                     return;
@@ -676,35 +716,40 @@ $(document).ready(function(){
                 
                 let vals = 0;
                 
-                switch (mode) {
-                    case "bicubic":
-                        vals = prep_values_bicubic_akima(durations, mode);
+                
+                switch (currentMode) {
+                    case CAMERA_MODE.BICUBIC:
+                        vals = prep_values_bicubic_akima(durations);
                         bicubic_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
                         break;
                         
-                    case "smooth_bicubic":
-                        vals = prep_values_bicubic_akima(durations, mode);
+                    case CAMERA_MODE.SMOOTH_BICUBIC:
+                        vals = prep_values_bicubic_akima(durations);
                         durations = normalise_durations(durations, vals);
                         bicubic_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
                         break;
                         
-                    case "akima":
-                        vals = prep_values_bicubic_akima(durations, mode);
+                    case CAMERA_MODE.AKIMA:
+                        vals = prep_values_bicubic_akima(durations);
                         akima_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
                         break;
                         
-                    case "smooth_akima":
-                        vals = prep_values_bicubic_akima(durations, mode);
+                    case CAMERA_MODE.SMOOTH_AKIMA:
+                        vals = prep_values_bicubic_akima(durations);
                         durations = normalise_durations(durations, vals);
                         akima_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
                         break;
                         
-                    case "linear":
+                    case CAMERA_MODE.LINEAR:
                         lerp_camera(durations);
                         break;
                     
-                    case "pause":
+                    case CAMERA_MODE.STEP:
                         step_camera(durations, loopCamera);
+                        break;
+                    
+                    case CAMERA_MODE.DIRECTOR:
+                        director_camera(durations, loopCamera);
                         break;
                     
                     default:
@@ -955,7 +1000,7 @@ $(document).ready(function(){
             
             
             // Fixes positions values before being sent to the camera animation
-            function prep_values_bicubic_akima(durations, camera_mode) {
+            function prep_values_bicubic_akima(durations) {
                 
                 var timeValue = durations.reduce((a, b) => a + b, 0);
                 var timeInMs = timeValue * 1000;
@@ -987,7 +1032,7 @@ $(document).ready(function(){
                 // TODO: Jank fix, Cubic Interpolator needs at least 3 values, Akima needs 5 values, Use Linear is less
                 if (positions.length == 2) {
                     
-                    if (camera_mode == "bicubic") {
+                    if (currentMode == CAMERA_MODE.BICUBIC || currentMode == CAMERA_MODE.SMOOTH_BICUBIC) {
                         
                         durations.splice(1, 0, (durations[1] - durations[0]) / 2 + durations[0])
                         xPosVals.splice(1, 0, (positions[1][0] - positions[0][0]) / 2 + positions[0][0]);
@@ -1007,7 +1052,7 @@ $(document).ready(function(){
                         hPosVals.splice(1, 0, (hPosVals[1] - hPosVals[0]) / 2 + hPosVals[0]);
                     }
                     
-                    if (positions.length < 5 && camera_mode == "akima") {
+                    if (currentMode == cameraMode.AKIMA || currentMode == CAMERA_MODE.SMOOTH_AKIMA) {
                         // TODO: Use bicubic to reach 5 points. If starting with only 2, use linear then bicubic.
                         dew.notify("chat", { message: "Needs 5 positions for akima (Start, End and 3 intermediary/mid positions). WIP to fix that.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                         camera_end();
@@ -1145,6 +1190,19 @@ $(document).ready(function(){
                 
             }
 
+            
+            function director_camera() {
+                
+                // For escape Key
+                cameraInterval = 1;
+                
+                // Warn if there's more than 10 Positions
+                if (positions.length > 10) {
+                    dew.notify("chat", { message: "You have more than 10 positions, only the first 10 will be accessible by the number keys. Use \"/edit\" to rearrange.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                }
+                
+                dew.command("Camera.Position " + positions[currentPosition][0] + " " + positions[currentPosition][1] + " " + positions[currentPosition][2] + " " + positions[currentPosition][3] + " " + positions[currentPosition][4]);
+            }
             
             function lerp_camera(durations) {
                 
