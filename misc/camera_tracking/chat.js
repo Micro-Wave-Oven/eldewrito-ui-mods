@@ -52,6 +52,8 @@ var loopCamera = false;
 
 var currentPosition = 0;
 
+var amountForward = 1000; //seconds
+
 var dataWindowOpen = false;
 var previewingPos = false;
 
@@ -111,7 +113,7 @@ $(document).ready(function(){
     
     $("html").on("keydown", function(e){
     
-        if(currentMode == CAMERA_MODE.DIRECTOR) {
+        if(currentMode == CAMERA_MODE.DIRECTOR) { // Director camera, keys 0-9
             
             if (e.keyCode <= 57 && e.keyCode >= 48) {
                 currentPosition = (e.keyCode - 48);
@@ -127,8 +129,15 @@ $(document).ready(function(){
                 }
             }
         }
-        
-        if(e.keyCode == 80 && cameraInterval != undefined){ //P
+    
+        if (currentMode != CAMERA_MODE.NONE && (e.keyCode == 37 || e.keyCode == 39)) { // Backward/Forward camera progress, left/right arrow keys
+            startTime += (e.keyCode == 37 ? amountForward : -(amountForward));
+            if (animationPaused) {
+                // TODO: Update camera
+            }
+        }
+    
+        if(currentMode != CAMERA_MODE.NONE && e.keyCode == 80 && cameraInterval != undefined){ //P
         
             animationPaused = !animationPaused;
             
@@ -588,6 +597,7 @@ $(document).ready(function(){
                     
                     dew.notify("chat", { message: " To pause the animation, press P", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: " To cancel the animation, press Escape", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: " To go forward/backward, use the left/right arrows", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     dew.notify("chat", { message: " Default mode is bicubic", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     
                     dew.notify("chat", { message: " /camera 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
@@ -789,6 +799,7 @@ $(document).ready(function(){
             }
             
             function camera_end() {
+                currentMode = CAMERA_MODE.NONE;
                 clearInterval(cameraInterval);
                 cameraInterval = undefined;
                 loopCamera = false;
