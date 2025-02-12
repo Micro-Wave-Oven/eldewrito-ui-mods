@@ -105,7 +105,7 @@ $(document).ready(function(){
                 dew.command("Camera.Mode first");
             }
         }
-                
+        
         if (e.keyCode == 44) {
             dew.command('Game.TakeScreenshot');  
         }
@@ -137,7 +137,7 @@ $(document).ready(function(){
             }
         }
     
-        if(currentMode != CAMERA_MODE.NONE && e.keyCode == 80 && cameraInterval != undefined){ //P
+        if(currentMode != CAMERA_MODE.NONE && e.keyCode == 80 && cameraInterval != undefined){ // P
         
             animationPaused = !animationPaused;
             
@@ -146,17 +146,6 @@ $(document).ready(function(){
             } else {
                 startTime += (performance.now() - pauseStartTime);
             }
-            
-            /*
-            if (!animationPaused) {
-                dew.command("Game.PlayUiSound 13");
-                setTimeout(() => {
-                    dew.command("Game.PlayUiSound 13");
-                }, 200);
-            } else {
-                dew.command("Game.PlayUiSound 14");
-            }
-            */
             
             e.preventDefault();
         }
@@ -619,7 +608,7 @@ $(document).ready(function(){
                 }
                 
                 if ( positions.length < 2 ) {
-                    dew.notify("chat", { message: "You need at list two points", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    dew.notify("chat", { message: "You need at least two points", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                     chatboxHide();
                     return;
                 }
@@ -678,7 +667,12 @@ $(document).ready(function(){
                         break;
                     
                     default:
-                        mode = "bicubic";
+                        currentMode = CAMERA_MODE.BICUBIC;
+                        dew.notify("chat", { message: "Unrecognised mode, using bicubic as default.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                        setTimeout(() => {
+                            $("#chatBox").val('');
+                            document.getElementById("chat").style.display = "none";
+                        }, 500);
                 }
                 
                 
@@ -730,24 +724,24 @@ $(document).ready(function(){
                 switch (currentMode) {
                     case CAMERA_MODE.BICUBIC:
                         vals = prep_values_bicubic_akima(durations);
-                        bicubic_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
+                        bicubic_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
                         break;
                         
                     case CAMERA_MODE.SMOOTH_BICUBIC:
                         vals = prep_values_bicubic_akima(durations);
                         durations = normalise_durations(durations, vals);
-                        bicubic_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
+                        bicubic_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
                         break;
                         
                     case CAMERA_MODE.AKIMA:
                         vals = prep_values_bicubic_akima(durations);
-                        akima_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
+                        akima_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
                         break;
                         
                     case CAMERA_MODE.SMOOTH_AKIMA:
                         vals = prep_values_bicubic_akima(durations);
                         durations = normalise_durations(durations, vals);
-                        akima_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals, loopCamera);
+                        akima_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
                         break;
                         
                     case CAMERA_MODE.LINEAR:
@@ -755,16 +749,16 @@ $(document).ready(function(){
                         break;
                     
                     case CAMERA_MODE.STEP:
-                        step_camera(durations, loopCamera);
+                        step_camera(durations);
                         break;
                     
                     case CAMERA_MODE.DIRECTOR:
-                        director_camera(durations, loopCamera);
+                        director_camera(durations);
                         break;
                     
                     default:
                         dew.notify("chat", { message: "Undefined mode somehow.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-                        chatboxHide();
+                        camera_end();
                         break;
                 }
                 
@@ -1063,7 +1057,7 @@ $(document).ready(function(){
                         hPosVals.splice(1, 0, (hPosVals[1] - hPosVals[0]) / 2 + hPosVals[0]);
                     }
                     
-                    if (currentMode == cameraMode.AKIMA || currentMode == CAMERA_MODE.SMOOTH_AKIMA) {
+                    if (currentMode == CAMERA_MODE.AKIMA || currentMode == CAMERA_MODE.SMOOTH_AKIMA) {
                         // TODO: Use bicubic to reach 5 points. If starting with only 2, use linear then bicubic.
                         dew.notify("chat", { message: "Needs 5 positions for akima (Start, End and 3 intermediary/mid positions). WIP to fix that.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
                         camera_end();
@@ -1111,7 +1105,7 @@ $(document).ready(function(){
             }
             
 
-            function bicubic_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals, loopCamera) {
+            function bicubic_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals) {
                 
                 // Create interpolators
                 var xValInterpolator = createCubicSplineInterpolator(durations, xPosVals);
@@ -1155,7 +1149,7 @@ $(document).ready(function(){
                 return;
             }
 
-            function akima_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals, loopCamera) {
+            function akima_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals) {
                 
                 // Create interpolators
                 var xValInterpolator = createAkimaSplineInterpolator(durations, xPosVals);
@@ -1210,6 +1204,10 @@ $(document).ready(function(){
                 // Warn if there's more than 10 Positions
                 if (positions.length > 10) {
                     dew.notify("chat", { message: "You have more than 10 positions, only the first 10 will be accessible by the number keys. Use \"/edit\" to rearrange.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                    setTimeout(() => {
+                        $("#chatBox").val('');
+                        document.getElementById("chat").style.display = "none";
+                    }, 500);
                 }
                 
                 dew.command("Camera.Position " + positions[currentPosition][0] + " " + positions[currentPosition][1] + " " + positions[currentPosition][2] + " " + positions[currentPosition][3] + " " + positions[currentPosition][4]);
@@ -1312,7 +1310,7 @@ $(document).ready(function(){
                 return;
             }
             
-            function step_camera(durations, loopCamera) {
+            function step_camera(durations) {
                 
                 durations = durations.map(n => n * 1000 * durations.length);
                 
