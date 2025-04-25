@@ -317,7 +317,7 @@ function handleVirtualScroll(type, axis, value) {
 }
 
 window.addEventListener('keydown', e => {
-    if (e.key === 'Escape' || e.key == bindKey) {
+    if (e.key === 'Escape') {
         dew.hide();
     }
 });
@@ -345,14 +345,20 @@ window.addEventListener("mousemove", e => {
 });
 
 document.addEventListener('keyup', e => {
-	if (isKeyboardBind(e.key) && initalKeyboardKey) {
-		initalKeyboardKey = false;
+	if (isKeyboardBind(e.key)) {
         
-		let selectedElement = document.querySelector('.cell.selected');
-		if (selectedElement) {
-			let index = selectedElement.getAttribute('data-index');
-			selectAction(index);
-		}
+        if (initalKeyboardKey) {
+            initalKeyboardKey = false;
+            
+            let selectedElement = document.querySelector('.cell.selected');
+            if (selectedElement) {
+                let index = selectedElement.getAttribute('data-index');
+                selectAction(index);
+            }
+            
+        } else {
+            dew.hide();
+        }
 	}
 });
 
@@ -363,10 +369,8 @@ document.addEventListener('keydown', e => {
 });
 
 function isKeyboardBind(bind){
-	for (let i = 0; i < keyboardbinds.length; i++) {
-		if (keyboardbinds[i] === bind) {
-			return true;
-		}
+	if (bind == bindKey) {
+		return true;
 	}
 	return false;
 }
