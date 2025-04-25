@@ -1,5 +1,5 @@
 // Change this value to the bind you chose to open this screen, so you can use the same key to close it.
-let bindKey = "5";
+let bindKey = "4";
 
 let items = [
     {
