@@ -26,6 +26,38 @@ var cachedPlayerJSON;
 
 
 
+// Player Join&Leave Modifs
+var prevPlayers = [];
+setInterval(() => {
+    
+    dew.getSessionInfo().then(function(session_info) {
+        
+        if (session_info.established) {
+            
+            dew.command('Server.ListPlayersJSON', {}).then(function(response) {
+                
+                var currPlayers = JSON.parse(response).map(x => x.name).filter(x => x.trim() != "");
+                
+                if (prevPlayers.length != 0) {
+                    prevPlayers
+                        .filter(x => x.trim() != "")
+                        .filter(x => !currPlayers.includes(x))
+                        .forEach(x => dew.notify("chat", { message: x + " left.", sender: "Activity", chatType: "DEBUG", color: "#7B00FF" }));
+                        
+                    currPlayers
+                        .filter(x => x.trim() != "")
+                        .filter(x => !prevPlayers.includes(x))
+                        .forEach(x => dew.notify("chat", { message: x + " joined.", sender: "Activity", chatType: "DEBUG", color: "#7B00FF" }));
+                }
+                
+                prevPlayers = currPlayers;
+            });
+        }
+    });
+    
+}, 1000);
+
+
 // Auto Camera Tracking
 const CAMERA_MODE = {
     NONE: "none",
