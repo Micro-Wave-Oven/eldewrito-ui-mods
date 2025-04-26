@@ -77,6 +77,23 @@ let items = [
             });
         } 
     },
+    { 
+        name: "Toggle 0.001  Speed",
+        action: function() {
+            let currValue = localStorage.getItem("sForgeMonitorSpeed");
+            
+            if (currValue) {
+                dew.command("Forge.MonitorSpeed " + currValue);
+                localStorage.removeItem("sForgeMonitorSpeed");
+                
+            } else {
+                dew.command("Forge.MonitorSpeed").then(function(currentValue) {
+                    localStorage.setItem("sForgeMonitorSpeed", currentValue);
+                    dew.command("Forge.MonitorSpeed 0");
+                });
+            }
+        }
+    },
 ];
 
 
@@ -122,6 +139,8 @@ function createGrid(items, heightSize, widthSize) {
             cell.style.setProperty('--border-width', borderSize + 'px');
             cell.style.width = `${cellWidthWithBorder}px`;
             cell.style.height = `${cellHeightWithBorder}px`;
+            cell.style.paddingLeft = "2px";
+            cell.style.paddingRight = "2px";
             cell.dataset.index = itemIndex;
             cell.dataset.position = `${i}-${j}`;
             cell.className = 'cell';
