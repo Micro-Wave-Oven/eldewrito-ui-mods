@@ -1,7 +1,11 @@
-@font-face{font-family:"Conduit ITC";src:url(dew://lib/Conduit-ITC.woff);}
+@font-face{
+    font-family:"Conduit ITC";
+    src: url(dew://lib/Conduit-ITC.woff);
+}
 
 body {
     margin: 0;
+    /* font-family: "Conduit ITC", sans-serif; */
     overflow: hidden;
 }
 
@@ -17,11 +21,20 @@ body {
     zoom: 75%;
 }
 
-.inGame #chat{
+.inGame #chat {
     bottom: 32%;
     left: 4px;  
     width: 25%;
     height: 45%;
+}
+
+@media ( min-aspect-ratio: 18/10 ) {
+    .inGame #chat {
+        bottom: 40%;
+        left: 5%;  
+        width: 27%;
+        height: 45%;
+    }
 }
 
 .inLobby #chat{
