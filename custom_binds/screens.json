@@ -161,7 +161,7 @@
 			"id": "toggle_fov",
 			"var": "Game.ToggleFovURL",
 			"url": "dew://screens/binds/toggle_fov/",
-			"captureInput": true,
+			"captureInput": false,
 			"zIndex": 10
 		}
 	]
