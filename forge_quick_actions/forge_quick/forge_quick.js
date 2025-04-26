@@ -1,6 +1,13 @@
 // Change this value to the bind you chose to open this screen, so you can use the same key to close it.
 let bindKey = "4";
 
+// Style
+const backgroundColor = "#37270AF0";
+const highlightColor  = "#6A4C2EF0";
+const borderColor     = "#FFD5A3F0";
+const textColor       = "#FFD5A3";
+
+// Actions
 let items = [
     {
         name: "Select Everything",
@@ -55,15 +62,12 @@ let items = [
     { name: "!kill", action: function() { dew.sendChat('!kill', false); } },
 ];
 
+
 let container = document.getElementById('widget-container');
-
 let grid = document.getElementById('grid');
-var currentPosition = [ 0, 0 ];
+var currentPosition = [0, 0];
 
-let controllerbind = "";
-let keyboardbinds = [];
 let initalKeyboardKey = false;
-let initalControllerKey = false;
 let hasGP = false;
 
 
@@ -93,8 +97,9 @@ function createGrid(items, heightSize, widthSize) {
             let title = "";
 
             let hasName = false;
-            if(item !== undefined && item.name !== "")
+            if(item !== undefined && item.name !== "") {
                 hasName = true;
+            }
             
             const cell = document.createElement('div');
             cell.style.setProperty('--border-width', borderSize + 'px');
@@ -136,7 +141,7 @@ function selectAction(index) {
             itemElements[i].classList.remove('selected');
     }
     
-    if (items != undefined && Object.hasOwn(items[index], 'action')) {
+    if (items != undefined && index < items.length && Object.hasOwn(items[index], 'action')) {
         items[index].action();
     }
     
@@ -147,27 +152,11 @@ dew.on('show', async function (event) {
     
 	currentPosition = [0,0];
     
-	dew.command("Settings.gamepad").then(function(response){
-		hasGP = response == 1;
-	});
-    
-	keyboardbinds = [];
-	controllerbinds = "";
-    
-    dew.command("Input.DumpBindingsJson", {}).then(function(response){
-        var bindDump = JSON.parse(response);
-        for (i = 0; i < bindDump.length; i++){
-			if(bindDump[i].actionName == "Emote")
-			{
-				controllerbind = bindDump[i].controllerButton;
-				keyboardbinds.push(bindDump[i].primaryKey);
-				keyboardbinds.push(bindDump[i].secondaryKey);
-			}
-        }
+	dew.command("Settings.gamepad").then(function(response) {
+		hasGP = (response == 1);
 	});
 	
 	initalKeyboardKey = true;
-	initalControllerKey = true;
 	
     // TODO: Make icons for the actions ?
     /*
@@ -178,8 +167,8 @@ dew.on('show', async function (event) {
     */
     
     drawSelector();
-		
-	if(hasGP){
+    
+	if (hasGP) {
 		const currItems = document.querySelectorAll(`[data-position="0-0"]`);
 		if(currItems.length > 0){
 			currItems[0].classList.add('selected');
@@ -187,10 +176,10 @@ dew.on('show', async function (event) {
 	}
         
 	// update the styling
-	container.style.setProperty('--background-color', "#37270af0");
-	container.style.setProperty('--highlight-color', "#6a4c2ef0");
-	container.style.setProperty('--border-color', "#ffd5a3f0");
-	container.style.setProperty('--text-color', "#ffd5a3");
+	container.style.setProperty('--background-color', backgroundColor);
+	container.style.setProperty('--highlight-color', highlightColor);
+	container.style.setProperty('--border-color', borderColor);
+	container.style.setProperty('--text-color', textColor);
 });
 
 function fetchEmoteIcons(emotes) {
@@ -222,7 +211,8 @@ function drawSelector() {
         selectAction(e.target.dataset.index);
     });
     
-    $('.cell span').off('click').on('click', function(e){
+    $('.cell .name').off('click').on('click', function(e){
+        console.log(e);
         selectAction(e.target.parentElement.dataset.index);
     });
     
@@ -250,22 +240,6 @@ dew.on('controllerinput', function (e) {
 	if (!hasGP) {
 		return;
     }
-	
-    const axisThreshold = 8689 / 32767.0;
-		
-	if (e.data[controllerbind] == 0 && initalControllerKey) { // key is up
-	
-		initalControllerKey = false;
-		let selectedElement = document.querySelector('.item.selected');
-		if (selectedElement) {
-			let index = selectedElement.getAttribute('data-index');
-			selectAction(index);
-		}
-	}
-	
-	if (e.data[controllerbind] > 0 && !initalControllerKey) { //key is down
-		dew.hide();
-	}
 
     if (e.data.B === 1) {
         dew.hide();
@@ -333,6 +307,7 @@ window.addEventListener("mousemove", e => {
 	let radius = Math.min(screenRect.width, screenRect.height) * 0.084;
     
 	let target = e.target;
+    
 	if (target.classList.contains('cell')) {
 		var itemElements = grid.querySelectorAll('.cell');
 		for (let i = 0; i < itemElements.length; i++) {
@@ -341,6 +316,15 @@ window.addEventListener("mousemove", e => {
                }
 		}
 		target.classList.add('selected');
+	}
+    
+    if (target.classList.contains('name')) {
+        var itemElements = grid.querySelectorAll('.cell');
+		for (let i = 0; i < itemElements.length; i++) {
+			if (itemElements[i].classList.contains('selected'))
+			itemElements[i].classList.remove('selected');
+		}
+		target.parentElement.classList.add('selected');
 	}
 });
 
