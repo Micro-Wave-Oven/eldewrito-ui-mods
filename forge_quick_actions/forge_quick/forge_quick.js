@@ -62,8 +62,21 @@ let items = [
             dew.command("Forge.Undo");
         }
     },
-    { name: "!yes", action: function() { dew.sendChat('!yes', false); } },
-    { name: "!kill", action: function() { dew.sendChat('!kill', false); } },
+    {
+        name: "Redo",
+        action: function() {
+            dew.command("Forge.Redo");
+        }
+    },
+    { 
+        name: "Show/Hide Invisibles",
+        action: function() { 
+            dew.command("Forge.ShowInvisibles").then(function(enabled) {
+                dew.command("Forge.ShowInvisibles " + (enabled == "1" ? "0" : "1"));
+                dew.notify("chat", { message: "Invisibles " + (enabled == "1" ? "hidden" : "shown"), sender: "Forge Actions", chatType: "DEBUG", color: "#005AF7" });
+            });
+        } 
+    },
 ];
 
 
