@@ -1,0 +1,168 @@
+{
+	"screens": [
+		{
+			"id": "browser",
+			"var": "Game.MenuURL",
+			"fallbackUrl": "dew://screens/browser/",
+			"captureInput": true,
+			"zIndex": 1
+		},
+		{
+			"id": "console",
+			"var": "Game.ConsoleURL",
+			"fallbackUrl": "dew://screens/console/",
+			"captureInput": true,
+			"zIndex": 11
+		},
+		{
+			"id": "chat",
+			"var": "Game.ChatURL",
+			"fallbackUrl": "dew://screens/chat/",
+			"captureInput": false,
+			"zIndex": 10
+		},
+		{
+			"id": "loading",
+			"var": "Game.LoadingURL",
+			"fallbackUrl": "dew://screens/loading/",
+			"captureInput": false,
+			"zIndex": 1
+		},
+		{
+			"id": "voting",
+			"var": "Game.VotingURL",
+			"fallbackUrl": "dew://screens/voting/",
+			"captureInput": true,
+			"zIndex": 0
+		},
+		{
+			"id": "title",
+			"var": "Game.TitleURL",
+			"fallbackUrl": "dew://screens/title/",
+			"captureInput": true,
+			"zIndex": 0
+		},
+		{
+			"id": "scoreboard",
+			"var": "Game.ScoreboardURL",
+			"fallbackUrl": "dew://screens/scoreboard/",
+			"captureInput": false,
+			"zIndex": 1
+		},
+		{
+			"id": "dialog",
+			"var": "Game.DialogURL",
+			"fallbackUrl": "dew://screens/dialog/",
+			"captureInput": true,
+			"zIndex": 100
+		},
+		{
+			"id": "settings",
+			"var": "Game.SettingsURL",
+			"fallbackUrl": "dew://screens/settings/",
+			"captureInput": true,
+			"zIndex": 9
+		},
+		{
+			"id": "profile_settings",
+			"var": "Game.ProfileSettingsURL",
+			"fallbackUrl": "dew://screens/profile_settings/",
+			"captureInput": true,
+			"zIndex": 3
+		},
+		{
+			"id": "server_settings",
+			"var": "Game.ServerSettingsURL",
+			"fallbackUrl": "dew://screens/server_settings/",
+			"captureInput": true,
+			"zIndex": 9
+		},
+		{
+			"id": "forge_object_properties",
+			"var": "Game.ForgeObjectPropertiesURL",
+			"fallbackUrl": "dew://screens/forge/object_properties/",
+			"captureInput": true,
+			"zIndex": 0
+		},
+		{
+			"id": "forge_object_creation",
+			"var": "Game.ForgeObjectCreationURL",
+			"fallbackUrl": "dew://screens/forge/object_creation/",
+			"captureInput": true,
+			"zIndex": 0
+		},
+		{
+			"id": "voip",
+			"var": "Game.VoipURL",
+			"fallbackUrl": "dew://screens/voip/",
+			"captureInput": false,
+			"zIndex": 110
+		},
+		{
+			"id": "weapon_offset",
+			"var": "Game.WeaponOffsetURL",
+			"fallbackUrl": "dew://screens/weapon_offset/",
+			"captureInput": true,
+			"zIndex": 1
+		},
+		{
+			"id": "screenshot_notice",
+			"var": "Game.ScreenshotNoticeURL",
+			"fallbackUrl": "dew://screens/screenshot_notice/",
+			"captureInput": false,
+			"zIndex": 90
+		},
+		{
+			"id": "report",
+			"var": "Game.PlayerReportURL",
+			"fallbackUrl": "dew://screens/report/",
+			"captureInput": true,
+			"zIndex": 80
+		},
+		{
+			"id": "ingame_voting",
+			"var": "Game.InGameVotingURL",
+			"fallbackUrl": "dew://screens/ingame_voting/",
+			"captureInput": false,
+			"zIndex": -10
+		},
+		{
+			"id": "emote",
+			"var": "Game.EmoteScreenURL",
+			"fallbackUrl": "dew://screens/emote/",
+			"captureInput": true,
+			"zIndex": 0
+		},
+		{
+			"id": "mod_download",
+			"url": "dew://screens/mod_download/",
+			"captureInput": true,
+			"zIndex": 4
+		},
+		{
+			"id": "mod_browse",
+			"url": "dew://screens/mod_browse/",
+			"captureInput": true,
+			"zIndex": 9
+		},
+		{
+			"id": "mod_info",
+			"url": "dew://screens/mod_info/",
+			"captureInput": true,
+			"zIndex": 10
+		},
+		{
+			"id": "podium",
+			"url": "dew://screens/podium/",
+			"captureInput": false,
+			"zIndex": 0
+		},
+		{
+			"id": "toggle_fov",
+			"var": "Game.ToggleFovURL",
+			"url": "dew://screens/binds/toggle_fov/",
+			"captureInput": true,
+			"zIndex": 10
+		}
+	]
+}
