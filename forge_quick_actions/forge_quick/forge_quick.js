@@ -323,26 +323,22 @@ window.addEventListener("mousemove", e => {
 	const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 	let radius = Math.min(screenRect.width, screenRect.height) * 0.084;
     
-	let target = e.target;
+    var itemElements = grid.querySelectorAll('.cell');
+    for (let i = 0; i < itemElements.length; i++) {
+	    if (itemElements[i].classList.contains('selected')) {
+            itemElements[i].classList.remove('selected');
+        }
+    }
     
-	if (target.classList.contains('cell')) {
-		var itemElements = grid.querySelectorAll('.cell');
-		for (let i = 0; i < itemElements.length; i++) {
-			if (itemElements[i].classList.contains('selected')) {
-                   itemElements[i].classList.remove('selected');
-               }
-		}
-		target.classList.add('selected');
-	}
+    let target = e.target;
+    
+    if (target.classList.contains('cell')) {
+        target.classList.add('selected');
+    }
     
     if (target.classList.contains('name')) {
-        var itemElements = grid.querySelectorAll('.cell');
-		for (let i = 0; i < itemElements.length; i++) {
-			if (itemElements[i].classList.contains('selected'))
-			itemElements[i].classList.remove('selected');
-		}
-		target.parentElement.classList.add('selected');
-	}
+        target.parentElement.classList.add('selected');
+    }
 });
 
 document.addEventListener('keyup', e => {
