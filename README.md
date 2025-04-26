@@ -56,6 +56,8 @@ Installation notes:
 - As with the rest, copy `screens.json` and the `forge_quick` folder inside your `game\ui\screens\` directory. (It'll ask you if you want to overwrite the `screens.json` file, say yes)
 - In your `dewrito_prefs.cfg` file, add the following line at the end: `bind 4 Game.ShowScreen forge_quick` where `4` is the key you want to bind it to. (Which I think it's a good key, as 1 is powerup, 2 is flashlight and 3 is emotes)
 - In the `forge_quick\forge_quick.js` file, set the `bindKey` variable to the same key you used to bind it. It'll allow you to press it to close the menu. (The Escape key and the right click also close the menu)
+- In the `forge_quick\forge_quick.js` file, you can change the `enableMouseUpChooseAction` variable to be able to hold the bind key, select with your mouse then release the bind key to execute the selected action. Default is false;
+
 
 ![forge_quick_actions](resources/forge_quick_actions.png)
 

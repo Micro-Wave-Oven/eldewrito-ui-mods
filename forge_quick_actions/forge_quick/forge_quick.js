@@ -1,6 +1,10 @@
 // Change this value to the bind you chose to open this screen, so you can use the same key to close it.
 let bindKey = "4";
 
+// If true, when you release the key, trigger the highlighted action.
+// If "false", do nothing when you release the key.
+let enableMouseUpChooseAction = false;
+
 // Style
 const backgroundColor = "#37270AF0";
 const highlightColor  = "#6A4C2EF0";
@@ -334,10 +338,12 @@ document.addEventListener('keyup', e => {
         if (initalKeyboardKey) {
             initalKeyboardKey = false;
             
-            let selectedElement = document.querySelector('.cell.selected');
-            if (selectedElement) {
-                let index = selectedElement.getAttribute('data-index');
-                selectAction(index);
+            if (enableMouseUpChooseAction) {
+                let selectedElement = document.querySelector('.cell.selected');
+                if (selectedElement) {
+                    let index = selectedElement.getAttribute('data-index');
+                    selectAction(index);
+                }
             }
             
         } else {
@@ -347,7 +353,7 @@ document.addEventListener('keyup', e => {
 });
 
 document.addEventListener('keydown', e => {
-	if(isKeyboardBind(e.key) && !initalKeyboardKey) {
+	if (isKeyboardBind(e.key) && !initalKeyboardKey) {
 		dew.hide();
     }
 });
