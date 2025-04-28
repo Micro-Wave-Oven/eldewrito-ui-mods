@@ -35,7 +35,10 @@ let items = [
     {
         name: "Magnet Auto Gen",
         action: function() {
-            dew.command("Forge.MagnetAutoGen");
+            dew.command("Forge.MagnetAutogen").then((enabled) => {
+                dew.command("Forge.MagnetAutogen " + (enabled == "1" ? "0" : "1"));
+                dew.notify("chat", { message: "MagnetAutogen " + (enabled == "1" ? "Disabled" : "Enabled"), sender: "Forge Actions", chatType: "DEBUG", color: "#005AF7" });
+            })
         }
     },
     {
