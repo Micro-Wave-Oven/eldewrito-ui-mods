@@ -67,7 +67,7 @@ Installation notes:
 
 Allows you to setup camera shots in forge to showcase your map, demo video WIP.
 
-Select the files in `misc/camera_tracking/` in the game's `ui\screens\` directory.
+Select the files in `misc/camera_tracking/` and copy them in the game's `ui\screens\` directory.
 
 (If you're using Forge Quick Actions, you need to merge the end of the camera tracking's screens.json file with the forge quick action's screens.json file)
 
