@@ -63,6 +63,23 @@ Installation notes:
 
 
 
+### Camera Mode / Camera Tracker / Cinematic Camera
+
+Allows you to setup camera shots in forge to showcase your map, demo video WIP.
+
+Select the files in `misc/camera_tracking/` in the game's `ui\screens\` directory.
+
+(If you're using Forge Quick Actions, you need to merge the end of the camera tracking's screens.json file with the forge quick action's screens.json file)
+
+Don't forget to bind the menu by putting `bind C Game.ShowScreen camera_tracking_actions` in your game's `\data\` folder.
+
+Find the commands by doing `/help` in chat.
+
+
+![camera_tracking_actions](resources/camera_tracking_actions.png)
+
+
+
 ## Revert changes
 
 Go into the backup folder and proceed with the same instructions as with the Installation step
