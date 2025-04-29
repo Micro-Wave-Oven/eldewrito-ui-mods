@@ -61,9 +61,15 @@ let items = [
         }
     },
     {
-        name: "Camera Help",
+        name: "Camera Tracking Help",
         action: function() {
             dew.notify("camera-action", { action: "/help" });
+        }
+    },
+    {
+        name: "Camera Player Help",
+        action: function() {
+            dew.notify("camera-action", { action: "/camera" });
         }
     },
 ];

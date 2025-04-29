@@ -187,7 +187,7 @@ function parseCamera(curr_command) {
     
     if (positions.length < 2) {
         dew.hide();
-        dew.notify("chat", { message: "You need at least two points", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+        dew.notify("chat", { message: "You need at least two points. Do \"/help\" for more info. Once you have two points, do \"/camera\" for more info.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
         return;
     }
     
