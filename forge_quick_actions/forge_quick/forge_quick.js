@@ -1,9 +1,12 @@
 // Change this value to the bind you chose to open this screen, so you can use the same key to close it.
 let bindKey = "4";
 
+// Change this to false to disable logging to chat
+const logToChat = true;
+
 // If true, when you release the key, trigger the highlighted action.
 // If "false", do nothing when you release the key.
-let enableMouseUpChooseAction = false;
+const enableMouseUpChooseAction = false;
 
 // Style
 const backgroundColor = "#37270AF0";
@@ -11,13 +14,24 @@ const highlightColor  = "#6A4C2EF0";
 const borderColor     = "#FFD5A3F0";
 const textColor       = "#FFD5A3";
 
+// Misc
+const forgeSpeedValuesToNames = {
+    "-1": "Error",
+    "0": "0.001 (Z-Fight Fixer)",
+    "1": "Slower",
+    "2": "Slow",
+    "3": "Normal",
+    "4": "Fast",
+    "5": "Faster",
+    "6": "Fastest",
+}
+
 // Actions
 let items = [
     {
         name: "Select Everything",
         action: function() {
             dew.command("Forge.SelectEverything");
-            //dew.notify("chat", { message: "Message here", sender: "Forge Actions", chatType: "DEBUG", color: "#005AF7" });
         }
     },
     {
@@ -37,7 +51,9 @@ let items = [
         action: function() {
             dew.command("Forge.MagnetAutogen").then((enabled) => {
                 dew.command("Forge.MagnetAutogen " + (enabled == "1" ? "0" : "1"));
-                dew.notify("chat", { message: "MagnetAutogen " + (enabled == "1" ? "Disabled" : "Enabled"), sender: "Forge Actions", chatType: "DEBUG", color: "#005AF7" });
+                if (logToChat) {
+                    dew.notify("chat", { message: "MagnetAutogen " + (enabled == "1" ? "Disabled" : "Enabled"), sender: "Forge Actions", chatType: "DEBUG", color: "#005AF7" });
+                }
             })
         }
     },
@@ -57,6 +73,9 @@ let items = [
         name: "Canvas",
         action: function() {
             dew.command("Forge.Canvas");
+            if (logToChat) {
+                dew.notify("chat", { message: "Canvas", sender: "Forge Actions", chatType: "DEBUG", color: "#005AF7" });
+            }
         }
     },
     {
@@ -76,7 +95,9 @@ let items = [
         action: function() { 
             dew.command("Forge.ShowInvisibles").then(function(enabled) {
                 dew.command("Forge.ShowInvisibles " + (enabled == "1" ? "0" : "1"));
-                dew.notify("chat", { message: "Invisibles " + (enabled == "1" ? "hidden" : "shown"), sender: "Forge Actions", chatType: "DEBUG", color: "#005AF7" });
+                if (logToChat) {
+                    dew.notify("chat", { message: "Invisibles " + (enabled == "1" ? "hidden" : "shown"), sender: "Forge Actions", chatType: "DEBUG", color: "#005AF7" });
+                }
             });
         } 
     },
@@ -88,11 +109,17 @@ let items = [
             if (currValue) {
                 dew.command("Forge.MonitorSpeed " + currValue);
                 localStorage.removeItem("sForgeMonitorSpeed");
+                if (logToChat) {
+                    dew.notify("chat", { message: "MonitorSpeed " + forgeSpeedValuesToNames["" + currValue], sender: "Forge Actions", chatType: "DEBUG", color: "#005AF7" });
+                }
                 
             } else {
                 dew.command("Forge.MonitorSpeed").then(function(currentValue) {
                     localStorage.setItem("sForgeMonitorSpeed", currentValue);
                     dew.command("Forge.MonitorSpeed 0");
+                    if (logToChat) {
+                        dew.notify("chat", { message: "MonitorSpeed " + forgeSpeedValuesToNames["0"], sender: "Forge Actions", chatType: "DEBUG", color: "#005AF7" });
+                    }
                 });
             }
         }
