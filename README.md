@@ -69,9 +69,9 @@ Allows you to setup camera shots in forge to showcase your map, demo video WIP.
 
 Select the files in `misc/camera_tracking/` and copy them in the game's `ui\screens\` directory.
 
-(If you're using Forge Quick Actions, you need to merge the end of the camera tracking's screens.json file with the forge quick action's screens.json file)
+If you want to use this alongside Forge Quick Actions, remove the `screens.json` file and rename `screens_with_forge_actions_rename_to_screens.json` to `screens.json`
 
-Don't forget to bind the menu by putting `bind C Game.ShowScreen camera_tracking_actions` in your game's `\data\` folder.
+Don't forget to bind the menu by putting `bind C Game.ShowScreen camera_tracking_actions` at the bottom of the `dewrito_prefs.cfg` file located in your game's `\data\` folder.
 
 Find the commands by doing `/help` in chat.
 

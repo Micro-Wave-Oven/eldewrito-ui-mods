@@ -1,6 +1,6 @@
 // Bind a key to show this screen:
-// In the console (F1): Input.Bind C Game.ShowScreen camera_tracking_actions
-// In dewrito_prefs.cfg: bind C Game.ShowScreen camera_tracking_actions
+// In the console (F1) (temporary): Input.Bind C Game.ShowScreen camera_tracking_actions
+// In dewrito_prefs.cfg (permanant): bind C Game.ShowScreen camera_tracking_actions
 
 
 // Change this value to the bind you chose to open this screen, so you can use the same key to close it.
@@ -23,41 +23,47 @@ const textColor       = "#D5FFA3";
 // Actions
 let items = [
     {
+        name: "Add Point",
+        action: function() {
+            dew.notify("camera-action", { action: "/add" });
+        }
+    },
+    {
         name: "Replay Last Track",
         action: function() {
-            dew.notify("camera-last-track", {});
+            dew.notify("camera-action", { action: "/replay" });
         }
     },
     {
         name: "Edit Points",
         action: function() {
-            dew.notify("camera-edit", {});
+            dew.notify("camera-action", { action: "/edit" });
         }
     },
     {
         name: "List All Points",
         action: function() {
-            dew.notify("camera-list", {});
+            dew.notify("camera-action", { action: "/list" });
         }
     },
     {
         name: "Export / Import",
         action: function() {
-            dew.notify("camera-export-import", {});
+            dew.notify("camera-action", { action: "/export" });
         }
     },
     {
         name: "Clear All Points",
         action: function() {
             if (confirm("Delete all points ?")) {
-                dew.notify("camera-clear", {});
+                dew.notify("camera-action", { action: "/clear" });
             }
         }
     },
     {
         name: "Camera Help",
         action: function() {
-            dew.notify("camera-help", {});
+            dew.notify("camera-action", { action: "/help" });
         }
     },
 ];

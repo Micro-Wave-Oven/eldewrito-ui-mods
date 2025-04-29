@@ -47,45 +47,6 @@ dew.on('hide', function () {
 });
 
 
-dew.on("camera-stop", function (ev) {
-    parseAction("/stop");
-});
-
-
-dew.on("camera-edit", function (ev) {
-    parseAction("/edit");
-});
-
-
-dew.on("camera-list", function (ev) {
-    parseAction("/list");
-});
-
-
-dew.on("camera-export-import", function (ev) {
-    parseAction("/export");
-});
-
-
-dew.on("camera-clear", function (ev) {
-    parseAction("/clear");
-});
-
-
-dew.on("camera-help", function (ev) {
-    parseAction("/help");
-});
-
-
-dew.on("camera-last-track", function (ev) {
-    if (last_camera_options.length == 0) {
-        dew.notify("chat", { message: "No previous track available", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
-        return;
-    }
-    parseCamera(last_camera_options);
-});
-
-
 dew.on("camera-action", function (ev) {
     parseAction(ev.data.action);
 });
@@ -114,6 +75,11 @@ function parseAction(input) {
             
             
         case "replay":
+            if (last_camera_options.length == 0) {
+                dew.notify("chat", { message: "No previous track available", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+                dew.hide();
+                return;
+            }
             parseCamera(last_camera_options);
             break;
         
