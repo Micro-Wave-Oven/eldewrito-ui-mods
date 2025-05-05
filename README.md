@@ -19,9 +19,15 @@ If you need help to figure it out, DM me on Discord at microwave.oven.
 ## Features
 
 
-### Browser Autoconnect Queue
+### Browser Enhancements
 
-Allows you to automatically connect to a server if it's full.
+The server browser has been modified for 2 enhancements:
+
+- Autoconnect. If the server is full, it'll attempt to reconnect. You are able to cancel this by clicking the X at the top right.
+- Mods size display. The browser will now show if you have the required mod, and if not, how much is needed to download the remaining ones. It will also show if the server doesn't require any mods.
+
+
+![browser](resources/browser_enhancements.png)
 
 
 ### Ping Display

@@ -134,14 +134,15 @@ button#cancel {
     content: '▼';
 }
 
-.server-list th:nth-child(1), .server-list td:nth-child(1){ width: 40%;}
-.server-list th:nth-child(2), .server-list td:nth-child(2){ width: 15%;}
+.server-list th:nth-child(1), .server-list td:nth-child(1){ width: 36%;}
+.server-list th:nth-child(2), .server-list td:nth-child(2){ width: 12%;}
 .server-list th:nth-child(3), .server-list td:nth-child(3){ width: 5%;}
-.server-list th:nth-child(4), .server-list td:nth-child(4){ width: 10%;}
-.server-list th:nth-child(5), .server-list td:nth-child(5){ width: 10%;}
-.server-list th:nth-child(6), .server-list td:nth-child(6){ width: 10%;}
-.server-list th:nth-child(7), .server-list td:nth-child(7){ width: 5%;}
+.server-list th:nth-child(4), .server-list td:nth-child(4){ width: 9%;}
+.server-list th:nth-child(5), .server-list td:nth-child(5){ width: 8%;}
+.server-list th:nth-child(6), .server-list td:nth-child(6){ width: 9%;}
+.server-list th:nth-child(7), .server-list td:nth-child(7){ width: 11%;}
 .server-list th:nth-child(8), .server-list td:nth-child(8){ width: 5%;}
+.server-list th:nth-child(9), .server-list td:nth-child(9){ width: 5%;}
 
 .server-list td {
     text-transform: capitalize;

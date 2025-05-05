@@ -41,13 +41,72 @@ serverListWidget.focus();
 
 
 // AutoConnect Modifs
-const delayRetrySeconds = 2;
-const maxRetries = 150;
+var autoConnectEnabled = true;
+var delayRetrySeconds = 1;
+var maxRetries = 150;
+var playSound = true;
 var cancelTimeout = undefined;
 var lastServer = undefined;
 var lastCurrentTry = undefined;
 var lastServerPassword = undefined;
-sessionStorage.setItem("autoconnect", false);
+
+
+
+// Server Modsize Modifs
+var localMods = {};
+var serverMods = {};
+
+
+function parseLocalMods(mods) {
+    mods = JSON.parse(mods);
+    localMods = mods.reduce((a, v) => ({ ...a, [v["hash"]]: v["filesize"]}), {});
+}
+
+function populateServerModsSize(server) {
+    
+    var totalSize = 0;
+    var haveSize = 0;
+    
+    for (let [hash, size] of Object.entries(serverMods[server])) {
+        totalSize += size;
+        if (hash in localMods) {
+            haveSize += size;
+        }
+    }
+    
+    let tmp_el = document.querySelectorAll('tr[data-ip="' + server + '"]');
+    if (tmp_el.length > 0) {
+        tmp_el = tmp_el[0].childNodes[6];
+        
+        if (haveSize == totalSize) {
+            tmp_el.innerText = "Complete";
+        } else {
+            tmp_el.innerText = formatSize(haveSize) + "/" + formatSize(totalSize);
+        }
+    }
+}
+
+function fetchServerMods(server) {
+
+    fetch(`http://${server}/mods`)
+    .then(response => response.json())
+    .then(mods => {
+        serverMods[server] = Object.values(mods).reduce((a, v) => ({ ...a, [v["hash"]]: v["package_size"]}), {});
+        populateServerModsSize(server);
+    })
+    .catch(error => { console.log(error); });
+}
+
+// From mod_browse.js
+function formatSize(size) {
+    if (size === 0)
+        return '0 B';
+    var i = Math.floor(Math.log(size) / Math.log(1024));
+    return (size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+}
+
+
+
 
 dew.on("browser-autoconnect", function (ev) {
     autoConnect(lastServer, lastCurrentTry + 10, lastServerPassword);
@@ -92,8 +151,10 @@ function autoConnect(server, currentTry, serverPassword) {
             lastCurrentTry = currentTry;
             lastServerPassword = serverPassword;
             
-            dew.playSound("alt_timer_sound");
-            setTimeout(() => { dew.playSound("alt_timer_sound"); }, 150);
+            if (playSound) {
+                dew.playSound("alt_timer_sound");
+                setTimeout(() => { dew.playSound("alt_timer_sound"); }, 150);
+            }
             
             if (serverPassword != undefined) {
                 dew.command(`Server.connect ${server} ${serverPassword}`);
@@ -123,6 +184,7 @@ function autoConnect(server, currentTry, serverPassword) {
     });
 }
 
+
 serverListWidget.on('select', function(e) {
     
     let server = e.element.dataset.ip;
@@ -137,27 +199,30 @@ serverListWidget.on('select', function(e) {
         cancelTimeout = undefined;
     }
     
-    if (e.element.dataset.type == "private") {
-        dew.dialog('server_password').then(password => {
-            if(password.length > 0) {
-                autoConnect(server, 1, password);
-                dew.playSound("a_button");
-            }
-        });
-    } else {
-        autoConnect(server, 1, undefined);
-    }
-    
-    
     // AutoConnect Modifs
-    /*
-    if(e.element.dataset.type == "private") {
-        promptPassword(server);
+    if (autoConnectEnabled) {
+        if (e.element.dataset.type == "private") {
+            dew.dialog('server_password').then(password => {
+                if(password.length > 0) {
+                    autoConnect(server, 1, password);
+                    dew.playSound("a_button");
+                }
+            });
+        } else {
+            autoConnect(server, 1, undefined);
+        }
+        
     } else {
-        dew.command(`Server.connect ${server}`);
-        dew.playSound("a_button");
+        if(e.element.dataset.type == "private") {
+            promptPassword(server);
+        } else {
+            dew.command(`Server.connect ${server}`);
+            dew.playSound("a_button");
+        }
     }
-    */
+    
+
+    
 });
 
 // End AutoConnect Modifs
@@ -199,6 +264,11 @@ $( document ).ready(function() {
 dew.on('show', async function() {
     visible = true;
     usedBrowserCamera = false;
+    
+    // Server Modsize Modifs
+    //dew.command('Server.ListMods').then(mods => { parseLocalMods(mods); });
+    parseLocalMods(await dew.command('Server.ListMods'));
+   
    
     Promise.all([dew.getVersion(),dew.getVersionCompat()])
         .then(function ([version, versionCompat]) {
@@ -455,8 +525,8 @@ function onRefreshEnded() {
 
 function serverPingProc() {
 	if(allMastersSeen && pingCounter <= 0) {
-       onRefreshEnded();
-       return;
+        onRefreshEnded();
+        return;
    	}
 
     var serverInfo = pingQueue.pop();
@@ -495,6 +565,16 @@ function ping(info) {
 			
             if(data.name)
                 data.name = data.name.replace(/\bhttp[^ ]+/ig, '');
+            
+            
+            // Server Modsize Modifs
+            if (data.modCount && !(info.server in serverMods)) {
+                fetchServerMods(info.server);
+            }
+            if (data.modCount && (info.server in serverMods)) {
+                // Kinda hacky ngl, feel free to find a better way
+                setTimeout(() => { populateServerModsSize(info.server); }, 100);
+            }
 
             resolve({
                 type: data.passworded ? 'private' : (officialStatus ? (officialStatus.ranked ? 'ranked' : 'social') : ''),
@@ -555,6 +635,14 @@ function ServerRow(server, connectCallback) {
             null,
             sanitize(server.variant)
         ),
+        
+        // Server Modsize Modifs
+        React.createElement(
+            'td',
+            null,
+            sanitize("No mods required")
+        ),
+        
         React.createElement(
             'td',
             null,
@@ -608,6 +696,14 @@ function ServerList(model, connectCallback) {
                     { onMouseDown: () => model.sort('variant'), className: model.currentSortKey == 'variant' ? `sort-${model.currentSortDir}` : '' } ,
                     'VARIANT'
                 ),
+                
+                // Server Modsize Modifs
+                React.createElement(
+                    'th',
+                    {},
+                    'MODS HAVE/TOTAL'
+                ),
+                
                 React.createElement(
                     'th',
                     { onMouseDown: () => model.sort('numPlayers'), className: model.currentSortKey == 'numPlayers' ? `sort-${model.currentSortDir}` : '' } ,
