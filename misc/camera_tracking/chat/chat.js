@@ -25,6 +25,13 @@ var settingsArray = { 'Game.HideChat': '0', 'Player.Name': '0', "Game.ChatMessag
 var cachedPlayerJSON;
 
 
+// Chat History Modifs
+var saved_chats = [];
+var saved_chatbox_value = "";
+var saved_chat_curr_index = -1;
+
+
+
 // Player Join&Leave Modifs
 var prevPlayers = [];
 
@@ -62,6 +69,10 @@ $(document).ready(function(){
     $(document).keyup(function (e) {
         if (e.keyCode === 27) {
             chatboxHide();
+            
+            // Chat History Modifs
+            saved_chatbox_value = "";
+            saved_chat_curr_index = -1;
         }
         if (e.keyCode == 44) {
             dew.command('Game.TakeScreenshot');  
@@ -70,9 +81,9 @@ $(document).ready(function(){
     $(document).keydown(function(e){
         if (e.keyCode === 13){ //Enter
         
-            var chatBoxInput = $("#chatBox").val();
             
             // Auto Camera Tracking Commands
+            var chatBoxInput = $("#chatBox").val();
             var cameraCommandIndex = Math.max(
                 chatBoxInput.toLowerCase().indexOf("/add"),
                 chatBoxInput.toLowerCase().indexOf("/list"),
@@ -95,6 +106,13 @@ $(document).ready(function(){
                 $("#chatBox").val("");
                 return;
             }
+            
+            
+            // Chat History Modifs
+            saved_chats.unshift($("#chatBox").val());
+            saved_chatbox_value = "";
+            saved_chat_curr_index = -1;
+            
             
             dew.sendChat($("#chatBox").val(), isTeamChat);
             chatboxHide();
@@ -185,6 +203,36 @@ $(document).ready(function(){
             if(mentions)
                 $("#chatBox").addClass("mentions");
         }
+        
+        
+        
+        // Chat History Modifs
+        
+        if (saved_chats.length > 25) { // Truncate saved_chats if needed
+            saved_chats = saved_chats.slice(0, 25);
+        }
+        if (e.keyCode == 38) { // Up Key
+            if (saved_chats.length != 0 && saved_chat_curr_index < (saved_chats.length - 1)) {
+                if (saved_chat_curr_index == -1) {
+                    saved_chatbox_value = $("#chatBox").val();
+                }
+                saved_chat_curr_index++;
+                $("#chatBox").val(saved_chats[saved_chat_curr_index]);
+            }
+        }
+        if (e.keyCode == 40) { // Down Key
+            if (saved_chat_curr_index >= -1) {
+                if (saved_chat_curr_index > -1) {
+                    saved_chat_curr_index--;
+                }
+                if (saved_chat_curr_index == -1) {
+                    $("#chatBox").val(saved_chatbox_value);
+                } else {
+                    $("#chatBox").val(saved_chats[saved_chat_curr_index]);
+                }
+            }
+        }
+        
     });
     
     $("#chatWindow").on("click", "a", function(e) {
