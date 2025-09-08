@@ -386,7 +386,7 @@ dew.on("chat", function(e){
         css: { backgroundColor: bgColor}, 
         text: e.data.sender 
     })
-    .wrap($('<p>', { class: chatClass })).parent().append(messageHtml));
+    .wrap($('<p>', { class: chatClass })).parent().append(" " + messageHtml));
     
     let messageLimit = settingsArray['Game.ChatMessageLimit'];
     const chatWindow = document.getElementById("chatWindow");
