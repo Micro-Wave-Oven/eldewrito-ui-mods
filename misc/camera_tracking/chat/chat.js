@@ -112,12 +112,17 @@ $(document).ready(function(){
             saved_chats.unshift($("#chatBox").val());
             saved_chatbox_value = "";
             saved_chat_curr_index = -1;
+            if (saved_chats.length > 25) { // Truncate saved_chats if needed
+                saved_chats = saved_chats.slice(0, 25);
+            }
             
             
             dew.sendChat($("#chatBox").val(), isTeamChat);
             chatboxHide();
         }else{
-            $("#chatBox").focus();
+            if (e.keyCode !== 17 && e.keyCode !== 67) {
+                $("#chatBox").focus();
+            }
         }
     });
     
@@ -137,7 +142,7 @@ $(document).ready(function(){
     });
 
     $("body").click(function(){
-        $("#chatBox").focus();
+        //$("#chatBox").focus();
     });
     
     $("#chatBox").keyup(function (e) {
@@ -207,10 +212,6 @@ $(document).ready(function(){
         
         
         // Chat History Modifs
-        
-        if (saved_chats.length > 25) { // Truncate saved_chats if needed
-            saved_chats = saved_chats.slice(0, 25);
-        }
         if (e.keyCode == 38) { // Up Key
             if (saved_chats.length != 0 && saved_chat_curr_index < (saved_chats.length - 1)) {
                 if (saved_chat_curr_index == -1) {
