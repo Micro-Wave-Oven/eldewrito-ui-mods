@@ -18,6 +18,7 @@ var cameraInterval = undefined;
 var startTime = 0;
 
 var animationPaused = false;
+var animationPausedButNeedsUpdate = false;
 var pauseStartTime = 0;
 var loopCamera = false;
 
@@ -262,6 +263,7 @@ function parseCamera(curr_command) {
     
     if (currentMode != CAMERA_MODE.DIRECTOR && !customDurationsEnabled && (isNaN(curr_command[0]) || !isFinite(curr_command[0])) ) {
         dew.notify("chat", { message: "Duration needs to be a number", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+        camera_end();
         return;
     }
     
@@ -277,6 +279,7 @@ function parseCamera(curr_command) {
     
     if (durations.length == 0 || durations.length != (positions.length - 1)) {
         dew.notify("chat", { message: "Incorrect number of durations, you have " + (positions.length - 1) + " tracks and " + durations.length + " durations.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+        camera_end();
         return;
     }
     
@@ -674,13 +677,13 @@ $(document).ready(function() {
             if (previewingPos) {
                 previewingPos = false;
                 document.getElementById("camera_popup_id").style.visibility = "visible";
-                dew.command("Camera.Mode first");
+                dew.command("Camera.Mode default");
             }
         }
     });
     
     
-    $("html").on("keydown", function(e){
+    $("html").on("keyup", function(e){
         
         // Director camera: switches between the first 10 positions using the number keys
         if(currentMode == CAMERA_MODE.DIRECTOR) {
@@ -702,9 +705,20 @@ $(document).ready(function() {
     
         // Go forward and backward
         if (currentMode != CAMERA_MODE.NONE && (e.keyCode == 37 || e.keyCode == 39)) { // Backward/Forward camera progress, left/right arrow keys
-            startTime += (e.keyCode == 37 ? amountForward : -(amountForward));
-            if (animationPaused) {
-                // TODO: Update camera when in pause camera
+        
+            if (animationPaused) { animationPausedButNeedsUpdate = true; }
+        
+            if (currentMode != CAMERA_MODE.DIRECTOR) {
+                startTime += (e.keyCode == 37 ? amountForward : -(amountForward));
+            }
+            
+            if (currentMode == CAMERA_MODE.DIRECTOR) {
+                currentPosition += ( e.keyCode == 37 ? -1 : 1);
+                if (currentPosition >= 0 && currentPosition < positions.length) {
+                    dew.command("Camera.Position " + positions[currentPosition][0] + " " + positions[currentPosition][1] + " " + positions[currentPosition][2] + " " + positions[currentPosition][3] + " " + positions[currentPosition][4]);
+                } else {
+                    currentPosition += ( e.keyCode == 37 ? 1 : -1);
+                }
             }
         }
         
@@ -798,8 +812,6 @@ function prep_values_bicubic_akima(durations) {
         vPosVals.push(positions[i][4]);
     }
 
-    
-    // TODO: Jank fix, Cubic Interpolator needs at least 3 values, Akima needs 5 values, Use Linear is less
     if (positions.length == 2) {
         
         if (currentMode == CAMERA_MODE.BICUBIC || currentMode == CAMERA_MODE.SMOOTH_BICUBIC) {
@@ -823,8 +835,7 @@ function prep_values_bicubic_akima(durations) {
         }
         
         if (currentMode == CAMERA_MODE.AKIMA || currentMode == CAMERA_MODE.SMOOTH_AKIMA) {
-            // TODO: Use bicubic to reach 5 points. If starting with only 2, use linear then bicubic.
-            dew.notify("chat", { message: "Needs 5 positions for akima (Start, End and 3 intermediary/mid positions). WIP to fix that.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+            dew.notify("chat", { message: "Akima camera needs at least 5 points to work.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
             camera_end();
             return;
         }
@@ -890,7 +901,15 @@ function bicubic_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosV
         cameraInterval = setInterval(function() {
             
             if (animationPaused) {
-                return;
+                
+                // If the animation is paused but the camera needs an update (pressing forward/backwards keys), update once
+                if (animationPausedButNeedsUpdate) {
+                    animationPausedButNeedsUpdate = false;
+                    startTime += (performance.now() - pauseStartTime);
+                    pauseStartTime = performance.now();
+                } else {
+                    return;
+                }
             }
             
             // Compute camera position values
@@ -934,7 +953,15 @@ function akima_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVal
         cameraInterval = setInterval(function() {
             
             if (animationPaused) {
-                return;
+                
+                // If the animation is paused but the camera needs an update (pressing forward/backwards keys), update once
+                if (animationPausedButNeedsUpdate) {
+                    animationPausedButNeedsUpdate = false;
+                    startTime += (performance.now() - pauseStartTime);
+                    pauseStartTime = performance.now();
+                } else {
+                    return;
+                }
             }
             
             // Compute camera position values
@@ -1015,7 +1042,15 @@ function lerp_camera(durations) {
         cameraInterval = setInterval(function() {
             
             if (animationPaused) {
-                return;
+                
+                // If the animation is paused but the camera needs an update (pressing forward/backwards keys), update once
+                if (animationPausedButNeedsUpdate) {
+                    animationPausedButNeedsUpdate = false;
+                    startTime += (performance.now() - pauseStartTime);
+                    pauseStartTime = performance.now();
+                } else {
+                    return;
+                }
             }
             
             var currTrack = trackSizes.findIndex((v, i) => currentStep <= v);
