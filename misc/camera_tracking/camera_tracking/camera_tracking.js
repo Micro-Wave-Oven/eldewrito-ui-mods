@@ -201,6 +201,9 @@ function parseCamera(curr_command) {
     
     last_camera_options = JSON.parse(JSON.stringify(curr_command));
     
+    var is_smooth_camera = false;
+    var interp_creator_function = undefined;
+    
     // Parse camera mode
     switch (curr_command[0]) {
         
@@ -208,6 +211,7 @@ function parseCamera(curr_command) {
         case "bi":
         case "bicubic":
             currentMode = CAMERA_MODE.BICUBIC;
+            interp_creator_function = createCubicSplineInterpolator;
             curr_command.shift();
             break;
         
@@ -215,6 +219,8 @@ function parseCamera(curr_command) {
         case "sbi":
         case "smooth_bicubic":
             currentMode = CAMERA_MODE.SMOOTH_BICUBIC;
+            interp_creator_function = createCubicSplineInterpolator;
+            is_smooth_camera = true;
             curr_command.shift();
             break;
         
@@ -223,6 +229,7 @@ function parseCamera(curr_command) {
         case "aki":
         case "akima":
             currentMode = CAMERA_MODE.AKIMA;
+            interp_creator_function = createAkimaSplineInterpolator;
             curr_command.shift();
             break;
         
@@ -231,6 +238,8 @@ function parseCamera(curr_command) {
         case "saki":
         case "smooth_akima":
             currentMode = CAMERA_MODE.SMOOTH_AKIMA;
+            interp_creator_function = createAkimaSplineInterpolator;
+            is_smooth_camera = true;
             curr_command.shift();
             break;
         
@@ -239,6 +248,7 @@ function parseCamera(curr_command) {
         case "pch":
         case "piecewisecubic":
             currentMode = CAMERA_MODE.PCH;
+            interp_creator_function = createPiecewiseCubicHermiteInterpolator;
             curr_command.shift();
             break;
         
@@ -247,6 +257,8 @@ function parseCamera(curr_command) {
         case "spch":
         case "smooth_piecewisecubic":
             currentMode = CAMERA_MODE.SMOOTH_PCH;
+            interp_creator_function = createPiecewiseCubicHermiteInterpolator;
+            is_smooth_camera = true;
             curr_command.shift();
             break;
             
@@ -322,37 +334,20 @@ function parseCamera(curr_command) {
     
     
     switch (currentMode) {
+        
         case CAMERA_MODE.BICUBIC:
-            vals = prep_values_interpolator(durations);
-            bicubic_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
-            break;
-            
         case CAMERA_MODE.SMOOTH_BICUBIC:
-            vals = prep_values_interpolator(durations);
-            durations = normalise_durations(durations, vals);
-            bicubic_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
-            break;
-            
         case CAMERA_MODE.AKIMA:
-            vals = prep_values_interpolator(durations);
-            akima_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
-            break;
-            
         case CAMERA_MODE.SMOOTH_AKIMA:
-            vals = prep_values_interpolator(durations);
-            durations = normalise_durations(durations, vals);
-            akima_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
-            break;
-            
         case CAMERA_MODE.PCH:
-            vals = prep_values_interpolator(durations);
-            pch_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
-            break;
-            
         case CAMERA_MODE.SMOOTH_PCH:
             vals = prep_values_interpolator(durations);
-            durations = normalise_durations(durations, vals);
-            pch_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
+            
+            if (is_smooth_camera) {
+                durations = normalise_durations(durations, vals);
+            }
+            
+            interpolator_camera(interp_creator_function, vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
             break;
             
         case CAMERA_MODE.LINEAR:
@@ -917,14 +912,14 @@ function prep_values_interpolator(durations) {
 
 // Different camera functions
 
-function bicubic_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals) {
+function interpolator_camera(interpolator_creator_function, durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals) {
     
     // Create interpolators
-    var xValInterpolator = createCubicSplineInterpolator(durations, xPosVals);
-    var yValInterpolator = createCubicSplineInterpolator(durations, yPosVals);
-    var zValInterpolator = createCubicSplineInterpolator(durations, zPosVals);
-    var hValInterpolator = createCubicSplineInterpolator(durations, hPosVals);
-    var vValInterpolator = createCubicSplineInterpolator(durations, vPosVals);
+    var xValInterpolator = interpolator_creator_function(durations, xPosVals);
+    var yValInterpolator = interpolator_creator_function(durations, yPosVals);
+    var zValInterpolator = interpolator_creator_function(durations, zPosVals);
+    var hValInterpolator = interpolator_creator_function(durations, hPosVals);
+    var vValInterpolator = interpolator_creator_function(durations, vPosVals);
     
     setTimeout(function() {
     
@@ -969,113 +964,6 @@ function bicubic_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosV
     return;
 }
 
-function akima_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals) {
-    
-    // Create interpolators
-    var xValInterpolator = createAkimaSplineInterpolator(durations, xPosVals);
-    var yValInterpolator = createAkimaSplineInterpolator(durations, yPosVals);
-    var zValInterpolator = createAkimaSplineInterpolator(durations, zPosVals);
-    var hValInterpolator = createAkimaSplineInterpolator(durations, hPosVals);
-    var vValInterpolator = createAkimaSplineInterpolator(durations, vPosVals);
-    
-    setTimeout(function() {
-    
-        startTime = performance.now();
-    
-        cameraInterval = setInterval(function() {
-            
-            if (animationPaused) {
-                
-                // If the animation is paused but the camera needs an update (pressing forward/backwards keys), update once
-                if (animationPausedButNeedsUpdate) {
-                    animationPausedButNeedsUpdate = false;
-                    startTime += (performance.now() - pauseStartTime);
-                    pauseStartTime = performance.now();
-                } else {
-                    return;
-                }
-            }
-            
-            // Compute camera position values
-            let currTime = performance.now() - startTime;                        
-            let posX = xValInterpolator(currTime);
-            let posY = yValInterpolator(currTime);
-            let posZ = zValInterpolator(currTime);
-            let posH = hValInterpolator(currTime);
-            let posV = vValInterpolator(currTime);
-            
-            dew.command("Camera.Position " + posX + " " + posY + " " + posZ + " " + posH + " " + posV);
-            
-            if (performance.now() >= (startTime + durations[durations.length - 1])) {
-                if (!loopCamera) {
-                    camera_end();
-                } else {
-                    startTime = performance.now();
-                }
-            }
-            
-        }, cameraIntervalMs);
-        
-    }, 1000);
-    
-    return;
-    
-    
-}
-
-function pch_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals) {
-    
-    // Create interpolators
-    var xValInterpolator = createPiecewiseCubicHermiteInterpolator(durations, xPosVals);
-    var yValInterpolator = createPiecewiseCubicHermiteInterpolator(durations, yPosVals);
-    var zValInterpolator = createPiecewiseCubicHermiteInterpolator(durations, zPosVals);
-    var hValInterpolator = createPiecewiseCubicHermiteInterpolator(durations, hPosVals);
-    var vValInterpolator = createPiecewiseCubicHermiteInterpolator(durations, vPosVals);
-    
-    setTimeout(function() {
-    
-        startTime = performance.now();
-    
-        cameraInterval = setInterval(function() {
-            
-            if (animationPaused) {
-                
-                // If the animation is paused but the camera needs an update (pressing forward/backwards keys), update once
-                if (animationPausedButNeedsUpdate) {
-                    animationPausedButNeedsUpdate = false;
-                    startTime += (performance.now() - pauseStartTime);
-                    pauseStartTime = performance.now();
-                } else {
-                    return;
-                }
-            }
-            
-            // Compute camera position values
-            let currTime = performance.now() - startTime;                        
-            let posX = xValInterpolator(currTime);
-            let posY = yValInterpolator(currTime);
-            let posZ = zValInterpolator(currTime);
-            let posH = hValInterpolator(currTime);
-            let posV = vValInterpolator(currTime);
-            
-            dew.command("Camera.Position " + posX + " " + posY + " " + posZ + " " + posH + " " + posV);
-            
-            if (performance.now() >= (startTime + durations[durations.length - 1])) {
-                if (!loopCamera) {
-                    camera_end();
-                } else {
-                    startTime = performance.now();
-                }
-            }
-            
-        }, cameraIntervalMs);
-        
-    }, 1000);
-    
-    return;
-    
-    
-}
 
 function director_camera() {
     
