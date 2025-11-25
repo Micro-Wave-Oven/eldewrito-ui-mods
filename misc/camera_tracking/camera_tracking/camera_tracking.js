@@ -5,6 +5,8 @@ const CAMERA_MODE = {
     SMOOTH_BICUBIC: "smooth_bicubic",
     AKIMA: "akima",
     SMOOTH_AKIMA: "smooth_akima",
+    PCH: "piecewisecubic",
+    SMOOTH_PCH: "smooth_piecewisecubic",
     STEP: "step",
     DIRECTOR: "director",
 };
@@ -176,6 +178,9 @@ function parseCamera(curr_command) {
         dew.notify("chat", { message: "- /camera <a/ak/aki/akima> 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
         dew.notify("chat", { message: "- /camera <sa/sak/saki/smooth_akima> 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
         
+        dew.notify("chat", { message: "- /camera <p/pc/pch/piecewisecubic> 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+        dew.notify("chat", { message: "- /camera <sp/spc/spch/smooth_piecewisecubic> 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+        
         dew.notify("chat", { message: "- /camera <l/lerp/linear> 10", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
         dew.notify("chat", { message: "- /camera <l/lerp/linear> dur 4 4 2", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
         
@@ -226,6 +231,22 @@ function parseCamera(curr_command) {
         case "saki":
         case "smooth_akima":
             currentMode = CAMERA_MODE.SMOOTH_AKIMA;
+            curr_command.shift();
+            break;
+        
+        case "p":
+        case "pc":
+        case "pch":
+        case "piecewisecubic":
+            currentMode = CAMERA_MODE.PCH;
+            curr_command.shift();
+            break;
+        
+        case "sp":
+        case "spc":
+        case "spch":
+        case "smooth_piecewisecubic":
+            currentMode = CAMERA_MODE.SMOOTH_PCH;
             curr_command.shift();
             break;
             
@@ -302,25 +323,36 @@ function parseCamera(curr_command) {
     
     switch (currentMode) {
         case CAMERA_MODE.BICUBIC:
-            vals = prep_values_bicubic_akima(durations);
+            vals = prep_values_interpolator(durations);
             bicubic_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
             break;
             
         case CAMERA_MODE.SMOOTH_BICUBIC:
-            vals = prep_values_bicubic_akima(durations);
+            vals = prep_values_interpolator(durations);
             durations = normalise_durations(durations, vals);
             bicubic_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
             break;
             
         case CAMERA_MODE.AKIMA:
-            vals = prep_values_bicubic_akima(durations);
+            vals = prep_values_interpolator(durations);
             akima_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
             break;
             
         case CAMERA_MODE.SMOOTH_AKIMA:
-            vals = prep_values_bicubic_akima(durations);
+            vals = prep_values_interpolator(durations);
             durations = normalise_durations(durations, vals);
             akima_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
+            break;
+            
+        case CAMERA_MODE.PCH:
+            vals = prep_values_interpolator(durations);
+            pch_camera(vals.durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
+            break;
+            
+        case CAMERA_MODE.SMOOTH_PCH:
+            vals = prep_values_interpolator(durations);
+            durations = normalise_durations(durations, vals);
+            pch_camera(durations, vals.xPosVals, vals.yPosVals, vals.zPosVals, vals.hPosVals, vals.vPosVals);
             break;
             
         case CAMERA_MODE.LINEAR:
@@ -784,7 +816,7 @@ function camera_end() {
 
 
 // Fixes positions values before being sent to the camera animation
-function prep_values_bicubic_akima(durations) {
+function prep_values_interpolator(durations) {
     
     var timeValue = durations.reduce((a, b) => a + b, 0);
     var timeInMs = timeValue * 1000;
@@ -945,6 +977,60 @@ function akima_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVal
     var zValInterpolator = createAkimaSplineInterpolator(durations, zPosVals);
     var hValInterpolator = createAkimaSplineInterpolator(durations, hPosVals);
     var vValInterpolator = createAkimaSplineInterpolator(durations, vPosVals);
+    
+    setTimeout(function() {
+    
+        startTime = performance.now();
+    
+        cameraInterval = setInterval(function() {
+            
+            if (animationPaused) {
+                
+                // If the animation is paused but the camera needs an update (pressing forward/backwards keys), update once
+                if (animationPausedButNeedsUpdate) {
+                    animationPausedButNeedsUpdate = false;
+                    startTime += (performance.now() - pauseStartTime);
+                    pauseStartTime = performance.now();
+                } else {
+                    return;
+                }
+            }
+            
+            // Compute camera position values
+            let currTime = performance.now() - startTime;                        
+            let posX = xValInterpolator(currTime);
+            let posY = yValInterpolator(currTime);
+            let posZ = zValInterpolator(currTime);
+            let posH = hValInterpolator(currTime);
+            let posV = vValInterpolator(currTime);
+            
+            dew.command("Camera.Position " + posX + " " + posY + " " + posZ + " " + posH + " " + posV);
+            
+            if (performance.now() >= (startTime + durations[durations.length - 1])) {
+                if (!loopCamera) {
+                    camera_end();
+                } else {
+                    startTime = performance.now();
+                }
+            }
+            
+        }, cameraIntervalMs);
+        
+    }, 1000);
+    
+    return;
+    
+    
+}
+
+function pch_camera(durations, xPosVals, yPosVals, zPosVals, hPosVals, vPosVals) {
+    
+    // Create interpolators
+    var xValInterpolator = createPiecewiseCubicHermiteInterpolator(durations, xPosVals);
+    var yValInterpolator = createPiecewiseCubicHermiteInterpolator(durations, yPosVals);
+    var zValInterpolator = createPiecewiseCubicHermiteInterpolator(durations, zPosVals);
+    var hValInterpolator = createPiecewiseCubicHermiteInterpolator(durations, hPosVals);
+    var vValInterpolator = createPiecewiseCubicHermiteInterpolator(durations, vPosVals);
     
     setTimeout(function() {
     
@@ -1341,4 +1427,151 @@ function computeHermitePolyCoefficients(xVals, yVals, firstDerivatives) {
       segmentCoeffs[i] = trimPoly(coeffs);
    }
    return segmentCoeffs;
+}
+
+
+
+
+// Auxiliary functions needed for Piecewise Cubic Hermite camera
+// Source: https://github.com/doug-a-brunner/slatec-pchip
+
+function dpchst(arg1, arg2) {
+    if (arg1 === 0 || arg2 === 0) {
+        return 0;
+    }
+    if (arg1 > 0) {
+        return arg2 > 0 ? 1 : -1;
+    }
+    return arg2 > 0 ? -1 : 1;
+}
+
+function dpchim(x, y) {
+    if (x.length !== y.length) {
+        console.log("input array lengths must match");
+    }
+    const n = x.length;
+    if (n < 2) {
+        console.log('number of data points less than two');
+    }
+    for (let i = 1; i < n; ++i) {
+        if (x[i] <= x[i - 1]) {
+            console.log('x-array not strictly increasing');
+        }
+    }
+    if (n === 2) {
+        const deriv = (y[1] - y[0]) / (x[1] - x[0]);
+        return [deriv, deriv];
+    }
+    const d = new Array(n);
+    let h1 = x[1] - x[0];
+    let del1 = (y[1] - y[0]) / h1;
+    let h2 = x[2] - x[1];
+    let del2 = (y[2] - y[1]) / h2;
+
+    // set d[0] via non-centered three-point formula, adjusted to be shape-preserving
+    let hsum = h1 + h2;
+    let w1 = (h1 + hsum) / hsum;
+    let w2 = -h1 / hsum;
+    d[0] = w1 * del1 + w2 * del2;
+    if (dpchst(d[0], del1) < 0) {
+        d[0] = 0;
+    }
+    else if (dpchst(del1, del2) < 0) {
+        // need do this check only if monotonicity switches
+        const dmax = 3 * del1;
+        if (Math.abs(d[0]) > Math.abs(dmax)) {
+            d[0] = dmax;
+        }
+    }
+
+    // loop through interior points
+    for (let i = 1; i < n - 1; ++i) {
+        if (i > 1) {
+            h1 = h2;
+            h2 = x[i + 1] - x[i];
+            hsum = h1 + h2;
+            del1 = del2;
+            del2 = (y[i + 1] - y[i]) / h2;
+        }
+        d[i] = 0;
+        if (dpchst(del1, del2) > 0) {
+            // use Brodlie modification of Butland formula
+            const hsumt3 = hsum * 3;
+            w1 = (hsum + h1) / hsumt3;
+            w2 = (hsum + h2) / hsumt3;
+            const dmax = Math.max(Math.abs(del1), Math.abs(del2));
+            const dmin = Math.min(Math.abs(del1), Math.abs(del2));
+            const drat1 = del1 / dmax;
+            const drat2 = del2 / dmax;
+            d[i] = dmin / (w1 * drat1 + w2 * drat2);
+        }
+        else {
+            d[i] = 0; // set d[i] = 0 unless data are strictly monotonic
+        }
+    }
+
+    // set d[n - 1] via non-centered three-point formula, adjusted to be shape-preserving
+    w1 = -h2 / hsum;
+    w2 = (h2 + hsum) / hsum;
+    d[n - 1] = w1 * del1 + w2 * del2;
+    if (dpchst(d[n - 1], del2) < 0) {
+        d[n - 1] = 0;
+    }
+    else if (dpchst(del1, del2) < 0) {
+        // need do this check only if monotonicity switches
+        const dmax = 3 * del2;
+        if (Math.abs(d[n - 1]) > Math.abs(dmax)) {
+            d[n - 1] = dmax;
+        }
+    }
+
+    return d;
+}
+
+function lowerBound(arr, value) {
+    if (arr.length === 0) {
+        return 0;
+    }
+    let low = 0;
+    let high = arr.length;
+
+    while (low < high) {
+        const mid = Math.floor((low + high) / 2);
+        if (arr[mid] < value) {
+            low = mid + 1;
+        }
+        else {
+            high = mid;
+        }
+    }
+    return high;
+}
+
+function piecewiseCubic(x, y, m, xI) {
+    const yI = new Array(xI.length);
+    for (let i = 0; i < x.length - 1; ++i) {
+        const dX = x[i + 1] - x[i];
+        const dY = y[i + 1] - y[i];
+        const c = (dY / dX - m[i]) / dX;
+        const d = (m[i] + m[i + 1] - (2 * dY) / dX) / (dX * dX);
+
+        const leftIndex = lowerBound(xI, x[i]);
+        let rightIndex = lowerBound(xI, x[i + 1]);
+        if (i === x.length - 2 && xI[rightIndex] === x[i + 1]) {
+            ++rightIndex;
+        }
+        const xISubset = xI.slice(leftIndex, rightIndex);
+        const yISubset = xISubset.map((v) => y[i] + (v - x[i]) * (m[i] + (v - x[i]) * (c + d * (v - x[i + 1]))));
+        for (let j = 0; j < yISubset.length; ++j) {
+            yI[j + leftIndex] = yISubset[j];
+        }
+    }
+    return yI;
+}
+
+function createPiecewiseCubicHermiteInterpolator(xVals, yVals) {
+    const derivates = dpchim(xVals, yVals)
+    const xValsCopy = Float64Array.from(xVals);
+    const yValsCopy = Float64Array.from(yVals);
+    return (x) => piecewiseCubic(xValsCopy, yValsCopy, derivates, [x])[0];
 }
