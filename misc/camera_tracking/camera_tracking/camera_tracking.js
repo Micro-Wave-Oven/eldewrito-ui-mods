@@ -629,9 +629,9 @@ function dataWindow() {
                 .click(function() {
                     let script_str = "AddBlockElements CutsceneCameraPoints\n\n";
                     positions.forEach((pos, i) => {
-                        script_str += "SetField CutsceneCameraPoints[" + i + "].Name \"position_" + i + "\"\n";
-                        script_str += "SetField CutsceneCameraPoints[" + i + "].Position " + pos[0] + " " + pos[1] + " " + pos[2] + "\n";
-                        script_str += "SetField CutsceneCameraPoints[" + i + "].Orientation " + pos[3] + " "  + pos[4] + " 0\n\n";
+                        script_str += "SetField CutsceneCameraPoints[*].Name \"position_" + i + "\"\n";
+                        script_str += "SetField CutsceneCameraPoints[*].Position " + pos[0] + " " + pos[1] + " " + pos[2] + "\n";
+                        script_str += "SetField CutsceneCameraPoints[*].Orientation " + pos[3] + " "  + pos[4] + " 0\n\n";
                     });
                     $('#camera_popup_textarea_id').val(script_str);
                 })
