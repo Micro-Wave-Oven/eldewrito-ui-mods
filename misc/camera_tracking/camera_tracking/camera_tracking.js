@@ -283,8 +283,9 @@ function parseCamera(curr_command) {
             break;
         
         default:
-            currentMode = CAMERA_MODE.BICUBIC;
-            dew.notify("chat", { message: "Unrecognised mode, using bicubic as default.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+            dew.hide();
+            dew.notify("chat", { message: "Please select a camera mode, do \"/camera\" for more info.", sender: "Camera", chatType: "DEBUG", color: "#FF9000" });
+            return;
     }
     
     
@@ -563,7 +564,7 @@ function dataWindow() {
             "display": "grid",
             "grid-template-columns": "1fr 1fr",
             "grid-template-rows": "24px auto 24px",
-            "grid-template-areas": '"Title Title" "TextArea TextArea" "Exit Save"',
+            "grid-template-areas": '"Title Title Title" "TextArea TextArea TextArea" "Exit Save Convert"',
             "grid-column-gap": "0px",
             "grid-row-gap": "4px",
         })
@@ -619,6 +620,20 @@ function dataWindow() {
                     dataWindowOpen = false;
                     document.getElementById("camera_popup_id").outerHTML = "";
                     dew.hide();
+                }),
+                
+            $('<button/>')
+                .attr('id', 'popup_close_button3')
+                .html("Convert to mainmenu script")
+                .css({"grid-area": "Convert"})
+                .click(function() {
+                    let script_str = "AddBlockElements CutsceneCameraPoints\n\n";
+                    positions.forEach((pos, i) => {
+                        script_str += "SetField CutsceneCameraPoints[" + i + "].Name \"position_" + i + "\"\n";
+                        script_str += "SetField CutsceneCameraPoints[" + i + "].Position " + pos[0] + " " + pos[1] + " " + pos[2] + "\n";
+                        script_str += "SetField CutsceneCameraPoints[" + i + "].Orientation " + pos[3] + " "  + pos[4] + " 0\n\n";
+                    });
+                    $('#camera_popup_textarea_id').val(script_str);
                 })
         ])
         .appendTo("body");
