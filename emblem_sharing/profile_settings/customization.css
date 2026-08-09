@@ -1,0 +1,247 @@
+.popup-window{
+	color: rgba(148, 164, 183, 0.75);
+	background: 	linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%),
+								linear-gradient(to right, rgba(11,25,51,1) 0%,rgba(14,25,45,1) 70%,rgba(9,22,46,1) 100%);
+
+	border-top: 1px solid rgba(98, 111, 121, 0.38);
+	border-bottom: 1px solid rgba(98, 111, 121, 0.05);
+	width: 100%;
+	font-size: 20px;
+	position: absolute;
+	text-align: left;
+	padding-top: 20px;
+	padding-left: 25%;
+	padding-right: 25%;
+	padding-bottom: 50px;
+	box-sizing: border-box;
+}
+.popup-window .header {
+	position: relative;
+	display: inline-block;
+	box-sizing: border-box;
+	height: 40px;
+	width: 100%;
+	text-align: left;
+	font-weight: 100;
+	text-transform: uppercase;
+	line-height: 0px;
+	color: var(--subheader-color);
+	font-size: 32px;
+	background: none;
+	margin-top: 20px;
+}
+.popup-window-area {
+	position: relative;
+	box-sizing: content-box;
+	display: inline-block;
+	width: 100%;
+	background-image: none;
+	padding-top: 0;
+	padding-bottom: 16px;
+}
+.popup-window .window-side-padding{
+	padding-left: 0;
+}
+.popup-window .bottomBar {
+	position: absolute;
+	left: 0;
+	padding-left: 25%!important;
+}
+
+body{
+}
+
+#background{
+	width: 100%;
+	height: 100%;
+	z-index: -100;
+}
+
+#background_left{
+	width: calc(50vw - 88.8vh);
+	height: 100%;
+	z-index: -101;
+}
+	#background_left_header{
+		position: absolute;
+		height: 13.3vh;
+		left: -266.6vh;
+		right: 0;
+		top: 0;
+		margin: auto;
+		width: 89vh;
+		background: -webkit-gradient(linear,49.9% 58.17%, 51.15% 119%, color-stop(0, rgba(0, 0, 0, 0)), color-stop(1, rgba(0, 0, 0, 0.4)));
+	}
+	#tab-gradient{
+		position: absolute;
+		height: 6.1vh;
+		left: -174.6vh;
+		right: 0;
+		top: 13.3vh;
+		margin: auto;
+		width: 11vh;
+		background-color: rgba(0,0,0,.25);
+		transform: skewX(-45deg);
+		box-shadow: inset -20px  0px   15px  -10px   rgba(0, 0, 0, 0.5);
+	}
+	#background_left_footer{
+		position: absolute;
+		height: 10vh;
+		left: -266.6vh;
+		right: 0;
+		bottom: 0;
+		margin: auto;
+		width: 89vh;
+		background: -webkit-gradient(linear,46.87% 19% ,49.17% -140.71% ,color-stop(0,rgba(0, 0, 0, 0) ),color-stop(1,rgba(0, 0, 0, 0.4) ));
+	}
+
+.ed-color-picker__hue-slider-wrapper{
+	height:25px;
+}
+
+.ed-color-picker__detail{
+	color: var(--color-iceblue)
+}
+
+#ButtonContainer{
+	height: 284px;
+	overflow: auto;
+	margin-top: 30px;
+	padding-top: 0px;
+	padding-bottom: 10px;
+}
+
+#infoBox{
+	display:none;
+	height: 130px;
+	padding-top: 40px;
+}
+
+.emblem-tile img{
+	height: 63px;
+	width: 63px;
+	float: right;
+	margin-right: 5px;
+} 
+
+.nameplate-tile img{
+	width: 185px;
+	float: right;
+	margin-right: 5px;
+}
+
+.emblemBox{
+	display: inline !important;
+	height:140px;
+}
+
+
+#playerNamePlate{
+	display: inline !important;
+	height: 35px;
+	width: 300px;
+	margin-top: 80px;
+	margin-left: -215px;
+	position: absolute;
+}
+
+#nameplateEmblem{
+	display: inline !important;
+	height: 30px;
+	margin-top: 2px;
+	margin-left: -10px;
+}
+
+#playerNamePlateName{
+	display: inline !important;
+	margin-top: 1.5px;
+	margin-left: 5.5px;
+	position: inherit;
+	color: white;
+	font-family: 'Conduit ITC';
+	font-size: 26px;
+	letter-spacing: -1px;
+	-webkit-text-stroke-width: 0.5px;
+	-webkit-text-stroke-color: black;
+}
+
+.emblemForm label{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0; top: 0;
+	box-sizing: border-box;
+}
+.emblemForm label{
+	display: flex;
+	align-items: flex-end;
+	padding: 12px;
+	font-size: var(--button-tile-large-fontsize);
+	text-transform: uppercase;
+	color: var(--button-tile-color);
+}
+
+.emblemBox img{
+	height: 130px;
+	margin-left: 30%;
+	margin-top: -70px;
+}
+
+.emblemPreviewBig {
+	height: 130px;
+	width: 130px;
+}
+
+.emblemPreviewSmall {
+	width: 31px;
+	heightA: 31px;
+}
+
+#nameplatePreview {
+	height: 36px;
+	position: absolute;
+	right: 45px;
+}
+
+#nameplateBase, #nameplateBaseTray {
+	height: 36px;
+	position: absolute;
+	left: -15px;
+	z-index: -1;
+}
+
+form.emblemColorForm {
+	grid-template-columns: repeat(3, 1fr);
+	grid-gap: 6px;
+	width: 100%;
+	height: 100%;
+}
+.emblemColorForm span {
+	box-sizing: border-box;
+	display: block;
+}
+
+
+input.setting, .emblemColorForm label {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	box-sizing: border-box;
+}
+
+.armorForm img {
+	width: 251px;
+	height: 141px;
+
+}
+
+.armorForm Label {
+	overflow: hidden;
+}
+
+img:not([src]) {
+   visibility: hidden;
+   height: 48px;
+}

@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+    <head>
+        <title>ElDewrito Podium</title>
+        <link rel="stylesheet" type="text/css" href="podium.css"/>
+        <script src="dew://lib/dew.js"></script>
+        <script src="dew://lib/jquery-2.2.1.min.js"></script>
+		<script src="dew://lib/pak-aware-context.js"></script>
+		<link href="dew://lib/window-resize.css" rel="stylesheet" />
+    </head>
+    <body>
+		<div id="container">
+		<div class="page_content">
+			<div id="player3" class="place player3In">
+				<div id="third_place">
+					<img id="third_background" data-pak="game" data-fallback="dew://assets/podium/third_bg.png" data-url="assets/podium/third_bg">
+					<img id="third_emblem" src="dew://assets/emblems/generic.png">
+					<img class="third_placeImg" data-pak="game" data-fallback="dew://assets/podium/third.png" data-url="assets/podium/third">
+					<span id="player3_name">Player</span>
+					<span id="player3_score">0</span>
+				</div>
+			</div>
+			<div id="player2" class="place player2In">
+				<div id="second_place">
+					<img id="second_background" data-pak="game" data-fallback="dew://assets/podium/second_bg.png" data-url="assets/podium/second_bg">
+					<img id="second_emblem" src="dew://assets/emblems/generic.png">
+					<img class="second_placeImg" data-pak="game" data-fallback="dew://assets/podium/second.png" data-url="assets/podium/second">
+					<span id="player2_name">Player</span>
+					<span id="player2_score">0</span>
+				</div>
+			</div>
+			<div id="player1" class="place player1In">
+				<div id="first_place">
+					<img id="first_background" data-pak="game" data-fallback="dew://assets/podium/first_bg.png" data-url="assets/podium/first_bg">
+					<img id="first_emblem" src="dew://assets/emblems/generic.png">
+					<img class="first_placeglow" data-pak="game" data-fallback="dew://assets/podium/firstplace_glow.png" data-url="assets/podium/firstplace_glow">
+					<img class="first_placeImg" data-pak="game" data-fallback="dew://assets/podium/first.png" data-url="assets/podium/first">
+					<span id="player1_name">Player</span>
+					<img id="player1_scoreslide" data-pak="game" data-fallback="dew://assets/podium/scoreslide.png" data-url="assets/podium/scoreslide">
+					<span id="player1_score">0</span>
+				</div>
+			</div>
+			<div id="kills" class="killFadeIn statsContainer">
+				<img class="stat_background" data-pak="game" data-fallback="dew://assets/podium/player_scores.png" data-url="assets/podium/player_scores">
+				<span class="statName">Kills</span><span id="killsText" class="stats">0</span>
+			</div>
+			<div id="assists" class="assistFadeIn statsContainer">
+				<img class="stat_background" data-pak="game" data-fallback="dew://assets/podium/player_scores.png" data-url="assets/podium/player_scores">
+				<span class="statName">Assists</span><span id="assistsText" class="stats">0</span>
+			</div>
+			<div id="deaths" class="deathFadeIn statsContainer">
+				<img class="stat_background" data-pak="game" data-fallback="dew://assets/podium/player_scores.png" data-url="assets/podium/player_scores">
+				<span class="statName">Deaths</span><span id="deathsText" class="stats">0</span>
+			</div>
+			<div id="streak" class="streakFadeIn statsContainer">
+				<img class="stat_background" data-pak="game" data-fallback="dew://assets/podium/player_scores.png" data-url="assets/podium/player_scores">
+				<span class="statName">Streak</span><span id="streakText" class="stats">0</span>
+			</div>
+		</div>
+		</div>
+    </body>
+	<script src="dew://lib/window-resize.js"></script>
+	<script src="podium.js"></script>
+</html>

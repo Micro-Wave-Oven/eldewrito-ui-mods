@@ -1,0 +1,193 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+	<!-- Common Include -->
+    <link rel="stylesheet" href="dew://lib/css/style-global-include.css"/>
+    <script type="text/javascript" src="dew://lib/dew.js"></script>
+    <script src="dew://lib/input.js"></script>
+    <script type="text/javascript" src="dew://lib/jquery-2.2.1.min.js"></script>
+	<!-- Window Resize-->
+    <script src="dew://lib/window-resize.js"></script>
+    <link rel="stylesheet" type="text/css" href="dew://lib/window-resize.css"/>
+
+	<!-- Customization -->
+	<link rel="stylesheet" href="customization.css">
+	<script type="text/javascript" src="customization.js"></script>
+	<script type="text/javascript" src="dew://lib/color-picker.js"></script>
+	<link rel="stylesheet" href="dew://lib/color-picker.css">
+	<script src="dew://lib/pak-aware-context.js"></script>
+</head>
+<body>
+    <div id="blackLayer"></div>
+    <img id="background_left" data-pak="mainmenu" data-url="assets/blur/blur_left" data-fallback="dew://assets/blur/blur_left.png">
+    <div id="background_left_header"></div>
+    <div id="tab-gradient"></div>
+    <div id="background_left_footer"></div>
+    <div id="container">
+        <div class="page_content">
+        	<img id="background" data-pak="mainmenu" data-url="assets/blur/customization-blur" data-fallback="dew://assets/blur/customization-blur.png">
+            <div id="settingsWindow" class="menu-fullscreen">
+                <h1 class="header window-side-padding">Customization</h1>
+                <ul class="tabs">
+                    <li id="page_1" onclick="page1()">
+						<a href="#page1">
+							<img class="button"></img>
+							<img class="button"></img>
+							<p>Armory</p>
+							<div class="tab-bg">
+								<div class="tab-shadow left"></div>
+								<div class="tab-shadow right"></div>
+							</div>
+						</a>
+					</li>
+                    <li id="page_2" onclick="page2()">
+						<a href="#page2">
+							<p>Colors</p>
+							<div class="tab-bg">
+								<div class="tab-shadow left"></div>
+								<div class="tab-shadow right"></div>
+							</div>
+						</a>
+					</li>
+					<li id="page_3" onclick="page3()">
+						<a href="#page3">
+							<p>Emblem</p>
+							<div class="tab-bg">
+								<div class="tab-shadow left"></div>
+								<div class="tab-shadow right"></div>
+							</div>
+						</a>
+					</li>
+                </ul>
+                <div class="tabpage-container window-side-padding">
+                  <div id="page1" class="tabpage grid-customization hide">
+                      <div id="ButtonContainer" class="buttonContainer">
+                          <span><div class="setting baseNav button-list inputButton" onclick="inputBox('playerName');"><label>Player Name</label></div></span>
+                          <span><div class="setting baseNav button-list inputButton" onclick="inputBox('serviceTag');"><label>Service Tag</label></div></span>
+						  <span><div class="setting baseNav button-list" onclick="armorShow('races',$(this),'races');"><label>Race</label></div></span>
+                      </div>
+                      <div id="infoBox" class="infoBox">
+                        <div class="infobox-header" id="infoHeader"></div>
+                        <div class="infobox-content" id="infoText"></div>
+                      </div>
+                      <div id="armorSideList" class="side-list has-vertical-scrollbar vertical-gradient-scroll">
+						<form class="armorForm hide tile-button tile-large" id="races"></form>
+                        <form class="armorForm hide tile-button tile-large" id="gender"></form>
+                      </div>
+
+                  </div>
+                  <div id="page2" class="tabpage grid-customization hide">
+                      <div id="ButtonContainer" class="buttonContainer">
+                         <span><div class="setting baseNav button-list" onclick="colorShow('colorsPrimary',$(this), 'colorsPrimary');"><label id="primaryButton">Armor Primary</label></div></span>
+                         <span><div class="setting baseNav button-list" onclick="colorShow('colorsSecondary',$(this), 'colorsSecondary');"><label id="secondaryButton">Armor Secondary</label></div></span>
+                         <span><div class="setting baseNav button-list" onclick="colorShow('colorsTertiary',$(this), 'colorsTertiary');"><label id="tertiaryButton">Armor Tertiary</label></div></span>
+                         <span><div class="setting baseNav button-list" onclick="colorShow('colorsQuaternary',$(this), 'colorsQuaternary');"><label id="quaternaryButton">Armor Quaternary</label></div></span>
+						 <span><div class="setting baseNav button-list" onclick="colorShow('colorsQuinary',$(this), 'colorsQuinary');"><label id="quinaryButton">Armor Quinary</label></div></span>
+                      </div>
+                      <div class="side-list">
+                        <form class="colorForm hide tile-button" id="colorsPrimary" spellcheck="false">
+                            <span id="customColor"><label><input type="radio" name="colorsPrimary" value="" onclick="document.getElementById('colorsPrimaryText').click()">Custom Color<input type="text" name="colorsPrimary" class="setting" id="colorsPrimaryText" value="#FFFFFF" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" readonly></label></span>
+                        </form>
+                        <form class="colorForm hide tile-button" id="colorsSecondary" spellcheck="false">
+                            <span id="customColor"><label><input type="radio" name="colorsSecondary" value="" onclick="document.getElementById('colorsSecondaryText').click()">Custom Color<input type="text" name="colorsSecondary" class="setting" id="colorsSecondaryText" value="#FFFFFF" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" readonly></label></span>
+                        </form>
+                        <form class="colorForm hide tile-button" id="colorsTertiary" spellcheck="false">
+                            <span id="customColor"><label><input type="radio" name="colorsTertiary" value="" onclick="document.getElementById('colorsTertiaryText').click()">Custom Color<input type="text" name="colorsTertiary" id="colorsTertiaryText" class="setting" value="#FFFFFF" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" readonly></label></span>
+                        </form>
+                        <form class="colorForm hide tile-button" id="colorsQuaternary" spellcheck="false">
+                            <span id="customColor"><label><input type="radio" name="colorsQuaternary" value="" onclick="document.getElementById('colorsQuaternaryText').click()">Custom Color<input type="text" name="colorsQuaternary" id="colorsQuaternaryText" class="setting" value="#FFFFFF" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" readonly></label></span>
+                        </form>
+						<form class="colorForm hide tile-button" id="colorsQuinary" spellcheck="false">
+                            <span id="customColor"><label><input type="radio" name="colorsQuinary" value="" onclick="document.getElementById('colorsQuinaryText').click()">Custom Color<input type="text" name="colorsQuinary" id="colorsQuinaryText" class="setting" value="#FFFFFF" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" readonly></label></span>
+                        </form>
+                        <form id="colorPicker" class="colorForm"></form>
+                      </div>
+                      <div id="infoBox" class="infoBox">
+                          <div class="infobox-header" id="infoHeader"></div>
+                          <div class="infobox-content" id="infoText"></div>
+                      </div>
+                  </div>
+				  <div id="page3" class="tabpage grid-customization hide">
+                      <div id="ButtonContainer" class="buttonContainer">
+					     <span><div class="setting baseNav button-list" onclick="emblemShowList('emblemIcon',$(this),false);"><label>Icon</label></div></span>
+					     <span><div class="setting baseNav button-list" onclick="emblemShowList('emblemBackgroundImage',$(this),false);"><label>Background Image</label></div></span>
+                         <span><div class="setting baseNav button-list" onclick="emblemShowList('colorsEmblemPrimary',$(this),true);"><label>Primary Color</label></div></span>
+                         <span><div class="setting baseNav button-list" onclick="emblemShowList('colorsEmblemSecondary',$(this),true);"><label>Secondary Color</label></div></span>
+                         <span><div class="setting baseNav button-list" onclick="emblemShowList('colorsEmblemImage',$(this),true);"><label>Background Color</label></div></span>
+                         <span><div class="setting baseNav button-list" onclick="emblemShowList('colorsNameplate',$(this),true);"><label>Nameplate Color</label></div></span>
+                         <span><div class="setting baseNav button-list" onclick="emblemShowList('nameplateImage',$(this),false);"><label>Nameplate Image</label></div></span>
+                         <!-- Custom Emblem Modifications -->
+                         <span><div class="setting baseNav button-list"><label for="emblem_filepicker">Custom Emblem</label><input type="file" accept="image/*" style="display:none;" id="emblem_filepicker" /></div></span>
+                      </div>
+                      <div class="emblemBox" id="infoBox">
+						<img class="emblemPreviewBig" name="emblemPreview" onerror="this.onerror=null;this.src='dew://assets/emblems/generic.png';"/>
+						<div id="playerNamePlate">
+							<canvas class="nameplateBase" name="nameplateBase" id="nameplateBase" onerror="this.onerror=null;this.src='dew://assets/emblems/nameplate/base.png';"></canvas>
+							<canvas class="nameplateBaseTray" name="nameplateBaseTray" id="nameplateBaseTray" onerror="this.onerror=null;this.src='dew://assets/emblems/nameplate/base_tray.png';"></canvas>
+							<img class="emblemPreviewSmall" name="emblemPreview" id="nameplateEmblem" onerror="this.onerror=null;this.src='dew://assets/emblems/generic.png';"/>
+							<a id="playerNamePlateName"></a>
+							<canvas class="nameplatePreview" name="nameplatePreview" id="nameplatePreview" onerror="this.onerror=null;this.src='dew://assets/emblems/nameplate/0.png';"/></canvas>
+						</div>
+                      </div>
+                      <div id="emblemImages" class="side-list has-vertical-scrollbar vertical-gradient-scroll">
+						<form class="emblemForm hide tile-button tile-large emblem-tile" id="emblemIcon"></form>
+						<form class="emblemForm hide tile-button tile-large emblem-tile" id="emblemBackgroundImage"></form>
+						<form class="emblemForm hide tile-button tile-large nameplate-tile" id="nameplateImage"></form>
+                      </div>
+					  <div id="emblemColors" class="side-list">
+					    <form class="emblemColorForm hide tile-button" id="colorsEmblemPrimary" spellcheck="false">
+                            <span id="customColor"><label><input type="radio" name="colorsEmblemPrimary" value="" onclick="document.getElementById('colorsEmblemPrimaryText').click()">Custom Color<input type="text" name="colorsEmblemPrimary" class="setting" id="colorsEmblemPrimaryText" value="#FFFFFF" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" readonly></label></span>
+                        </form>
+                        <form class="emblemColorForm hide tile-button" id="colorsEmblemSecondary" spellcheck="false">
+                            <span id="customColor"><label><input type="radio" name="colorsEmblemSecondary" value="" onclick="document.getElementById('colorsEmblemSecondaryText').click()">Custom Color<input type="text" name="colorsEmblemSecondary" class="setting" id="colorsEmblemSecondaryText" value="#FFFFFF" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" readonly></label></span>
+                        </form>
+                        <form class="emblemColorForm hide tile-button" id="colorsEmblemImage" spellcheck="false">
+                            <span id="customColor"><label><input type="radio" name="colorsEmblemImage" value="" onclick="document.getElementById('colorsEmblemImageText').click()">Custom Color<input type="text" name="colorsEmblemImage" id="colorsEmblemImageText" class="setting" value="#FFFFFF" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" readonly></label></span>
+                        </form>
+						
+						<form class="emblemColorForm hide tile-button" id="colorsNameplate" spellcheck="false">
+                            <span id="customColor"><label><input type="radio" name="colorsNameplate" value="" onclick="document.getElementById('colorsNameplateText').click()">Custom Color<input type="text" name="colorsNameplate" id="colorsNameplateText" class="setting" value="#FFFFFF" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" readonly></label></span>
+                        </form>
+						
+                        <form id="emblemColorPicker" class="emblemColorForm"></form>
+                      </div>
+                  </div>
+                  <div id="playerWindow"></div>
+                </div>
+                <div class="bottomBar window-side-padding">
+					<button id="cancelButton" class="legend-button"><img class="button">Close</button>
+					<button id="toggleIconButton" class="legend-button" onclick="toggleIcon();"><img class="button">Toggle Icon</button>
+					<button id="randomEmblem" class="legend-button randomizer" onclick="randomEmblem();"><img class="button">Random Emblem</button>
+					<button id="randomColors" class="legend-button randomizer" onclick="randomColors();"><img class="button">Random Colors</button>
+					<button id="randomArmor" class="legend-button randomizer" onclick="randomArmor();"><img class="button">Random Armor</button>
+					<button id="reset" class="legend-button randomizer" onclick="reset();"><img class="button">Reset</button>
+					<button id="modBrowser" class="legend-button" onclick="openModBrowser();"><img class="button">Mod Browser</button>
+                    <!-- Custom Emblem Modifications -->
+					<button id="customEmblemRemove" style="display:none;" class="legend-button"><img class="button">Remove Custom Emblem</button>
+                </div>
+            </div>
+
+            <div class="popup-window-container" id="inputBox">
+              <div class="popup-window-wrapper">
+                <div class="popup-window">
+                    <h1 class="header window-side-padding"></h1>
+                    <div class="popup-window-area window-side-padding">
+                        <input type="text" class="popup-window-textinput textInput" id="pName" placeholder="..." spellcheck="false" maxlength="15">
+                        <input type="text" class="popup-window-textinput textInput" id="sTag" placeholder="..." spellcheck="false" maxlength="4" pattern="[a-zA-Z0-9]+">
+                    </div>
+
+                    <div class="bottomBar window-side-padding">
+                        <button id="okButton" class="legend-button"><img class="button">Ok</button>
+                        <button id="dismissButton" class="legend-button"><img class="button">Cancel</button>
+                    </div>
+                  </div>
+
+
+              </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

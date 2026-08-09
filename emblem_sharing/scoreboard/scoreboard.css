@@ -1,0 +1,579 @@
+@font-face{font-family:"Conduit ITC";src:url(dew://lib/Conduit-ITC.woff);}
+
+html {
+    color: #FFF;
+    font-family: "Conduit ITC", sans-serif;
+    overflow: hidden;
+}
+html, body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	background:rgba(0,0,0,0.2);
+}
+
+#window{
+    position: absolute;
+    left: 31%;
+    top: 5%;
+    width: 35%;
+    
+}
+
+#window.expanded {
+    width: 62%;
+    left: 18%;
+}
+
+#window table{
+    width: 100%;
+}
+
+#window table tbody tr td{
+    background-color: rgba(250, 250, 250, 0.12);
+}
+
+#header{
+    background-color: rgba(0, 0, 0, 0.8);
+    height: 25px;
+    font-size: 15px;
+    line-height: 23px;
+    letter-spacing: 0.5px;
+}
+
+#winnerText{
+    font-size: 18px;   
+    padding-left: 3px;
+}
+
+#roundText{
+    font-size: 18px;   
+    padding-left: 3px;
+}
+
+.rank{
+    width:25px;
+}
+
+.player{
+    text-align: center;
+    height: 22px;
+    font-size: 18px;
+    line-height: 22px;
+    padding: 22px;
+    margin: 1px;
+    z-index: 1;
+	text-shadow:
+		-1px -1px 1px #00000099,
+		 0   -1px 1px #00000099,
+		 1px -1px 1px #00000099,
+		 1px  0   1px #00000099,
+		 1px  1px 1px #00000099,
+		 0    1px 1px #00000099,
+		-1px  1px 1px #00000099,
+		-1px  0   1px #00000099;
+    letter-spacing: 1px;
+    cursor: default;
+    display:table-row;
+}
+
+.clickable:hover, .clickable.selected {
+    box-shadow: inset 1px 1px 1px 22px rgba(255, 255, 255, 0.2);
+	-box-shadow: inset 0 4px 2px -2px rgba(255, 255, 255, 1), inset 0 -4px 2px -2px rgba(255, 255, 255, 1);
+}
+
+
+.teamName {
+    -text-transform: uppercase;
+	padding-left: 5px;
+}
+
+.score, .playerRank, .serviceTag{
+    background-color:rgba(0, 0, 0, 0) !important;
+	box-shadow: inset 0px 0px 9px -5px black;
+}
+
+.serviceTag{
+	width: 58px;
+	box-shadow: inset 5px 0px 12px -5px black;
+}
+
+.playerRank{
+    width:30px;
+}
+
+.stat{
+    width:70px;
+}
+
+.name{
+    text-align:left;
+}
+
+.playerName {
+    font-size: 17px;
+    width: 264px;	
+}
+
+.emblem, .player-emblem{
+    padding-right: 2px;
+}
+
+.player-ping{
+	position: absolute;
+    height: 24px;
+    right: -8px;
+    margin-top: -1px;
+    image-rendering: pixelated;
+}
+
+.rankimg{
+	height:22px;
+	margin-right:1px;
+    margin-bottom:-5px;
+}
+
+.emblem{
+    height:22px;
+	width: 22px;
+    margin-bottom:-5px;
+}
+
+.gameObjective{
+	position: absolute;
+	left: -25px;
+	opacity: 0.8;
+}
+
+.speaker{
+    position: absolute;
+    left: -23px;
+    opacity: 0;
+}
+
+.hasSpokenObjective {
+	left: -50px !important;
+}
+
+.volSlider{
+    display:none;
+    position: absolute;
+    left: -77px;
+    width: 70px;
+}
+
+.speaker:hover{
+    opacity: 1;
+}
+
+.talking{
+    opacity: 1 !important;
+}
+
+.objective{
+    position: absolute;
+}
+
+#modInfoButton, #closeButton{
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(122,175,209, 0.8);
+    color: rgba(122,175,209, 0.9);
+    width: 5%;
+    height: 35px;
+    line-height: 35px;
+    right: 5%;
+    bottom: 2%;
+    text-align: center;
+    display: none
+}
+
+#modInfoButton img, #closeButton img{
+    display:none;
+    width: 26px;
+    position: absolute;
+    margin-right: 10px;
+    top: 5px;
+    left: 3px;
+}
+
+#modInfoButton:hover, #closeButton:hover{
+    background-color: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(122,175,209, 0.9);
+    color: rgba(160, 199, 222);
+}
+
+#playerBreakdown{
+    position: absolute;
+    left: 20%;
+    top: 20%;
+    width: 60%;
+    height: 58%;
+	background-image: -webkit-linear-gradient( -90deg, rgba(27,41,70,0.94902) 0%, rgba(24,39,69,0.9) 20%, rgba(24,39,69,0.90196) 20%, rgba(6,16,37,0.85098) 100%);
+    border: 1px solid #000;
+    display: none;
+    padding-left: 19px;
+    font-weight:300;
+}
+
+.statsHeader{
+    width: calc(100%+13px);
+    height: 32px;
+    background-color: #000;
+    color: #FFF;
+    line-height: 32px;   
+    font-size: 18px;
+    padding-left: 7px;
+    margin-left: -19px;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+#playerBreakdown:first-child div{
+    background-color: rgba(250, 250, 250, 0.12);
+}
+
+#playerBreakdown .player:hover>td:first-child {
+    text-decoration: underline;
+}
+
+#playerName{
+    font-size: 29px;
+    font-weight: 500;
+    height: 50px;
+    line-height: 50px;
+    width: 53%;
+    margin-top: 7px;
+    margin-left: -19px;
+    margin-bottom: 4px;
+    padding-left: 19px;
+	text-shadow:
+		-1px -1px 1px #00000099,
+		 0   -1px 1px #00000099,
+		 1px -1px 1px #00000099,
+		 1px  0   1px #00000099,
+		 1px  1px 1px #00000099,
+		 0    1px 1px #00000099,
+		-1px  1px 1px #00000099,
+		-1px  0   1px #00000099;
+    border: 1px solid #000;
+    border-left: 0;
+}
+
+#playerName .emblem{
+    height: 44px;
+	width: 44px;
+    margin-bottom:-12px;
+    margin-right: 6px;
+}
+
+.medal{
+    position: relative;
+    text-align: right;
+    width: 64px;
+    height: 64px;
+    margin: 2px;
+    background-size: 45px 45px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-color: rgba(0, 0, 0, 0.3);
+    float: left;
+}
+
+.medal .medalCount{
+    position: absolute;
+    bottom: 0;
+    right: 3px;
+}
+
+#bigMedalImage{
+	position: absolute;
+	width: 100%;
+	height: 68%;
+}
+
+.medalImage{
+	width: 100%;
+	height: 100%;	
+}
+
+#bigMedal{
+    position: absolute;
+    top: 9.5%;
+    right: 15px;
+    height: 56%;
+    width: 336px;
+    background-size: 68% 68%;
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+#bigMedal .medalName{
+    position: absolute;
+    text-align: center;
+    bottom: 45px;
+    width: 100%;
+    height: 22px;
+    font-size: 22px;
+    border-top: 4px solid rgba(24,39,69,0.5);
+}
+
+#bigMedal .medalDesc{
+    position: absolute;
+    text-align: center;
+    bottom: 6px;
+    width: 90%;
+    margin-left: 5%;
+    margin-right: auto;
+    font-size: 16px;
+}
+
+#medalBox{
+    position: absolute;
+    top: 66%;
+    right: 13px;
+    float: right;
+    width: 340px;
+    height: 132px;
+}
+
+#windowClose #closeButton{
+    padding: 0;
+}
+#windowClose:hover,#expandCollapse:hover, #previousPlayer:hover, #nextPlayer:hover {
+	text-decoration: underline;
+}
+#windowClose:focus,#expandCollapse:focus {
+    outline: 0;
+}
+
+#previousPlayer, #nextPlayer, #windowClose{
+	position: relative;
+    height: 35px;
+    line-height: 35px;
+    font-size: 15px;
+	font-weight: 100;
+	color: white;
+	background-color: rgba(0,0,0,0);
+	border: none;
+	z-index: 3;
+	text-align: left;
+	vertical-align: middle;
+	box-sizing: border-box;
+	padding: none;
+	float: left;
+}
+
+#previousPlayer:disabled, #nextPlayer:disabled{
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+#playerBreakdown .button{
+	display:none;
+	position:relative;
+	height: 30px;
+	float: left;
+    margin-right: 8px;
+    top: 2px;
+}
+
+.bottomBar{
+    position: absolute;
+    bottom: 15px;
+    left: 0;
+    padding-left: 13px;
+}
+
+#killedMost, #killedMostBy{
+    width: 40%;
+    border-collapse: collapse;
+}
+
+#killedMost tbody tr, #killedMostBy tbody tr{
+    border: 1px solid black;
+}
+
+#killedMost tbody tr td:first-of-type, #killedMostBy tbody tr td:first-of-type{
+    padding-left: 19px;
+    text-align: left;
+}
+
+#killedMost tbody tr td:last-of-type, #killedMostBy tbody tr td:last-of-type, #killedMost thead tr td:last-of-type, #killedMostBy thead tr td:last-of-type{
+	width: 20%;
+}
+
+#serverName, #mapName, #modName{
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+    color: rgba(160, 199, 222);
+    padding: 0;
+}
+
+#serverName{
+	bottom: 4%;
+}
+
+#mapName{
+    bottom: 1.3%;
+}
+
+#modName{
+    bottom: 0%;
+}
+
+.serverNameOffset{
+	bottom: 5% !important;
+}
+
+.mapNameOffset{
+	bottom: 2.5% !important;
+}
+
+.player-rank{
+    width: 38px;
+    margin-bottom: -10px;
+    margin-right: 6px;
+    float: right;
+}
+
+ul.scoreboardContextMenu {
+    list-style: none;
+}
+.scoreboardContextMenu {
+    background-image: -webkit-linear-gradient( -90deg, rgba(27,41,70,0.94902) 0%, rgba(24,39,69,0.9) 20%, rgba(24,39,69,0.90196) 20%, rgba(6,16,37,0.85098) 100%);
+    border: 1px solid #000;
+    width: 200px;
+    z-index: 999;
+    position: relative;
+    top: 0px;
+    left: 0px;
+    margin:0;
+    padding:0;
+}
+
+.scoreboardContextMenuItem {
+    color: #A0C7DE;
+    padding: 4px 6px;
+    text-transform: uppercase;
+}
+
+.scoreboardContextMenuItem:hover {
+    background-color: rgba(255, 250, 245, 0.15);
+    color: #FFFFFF;
+}
+
+.contextMenuOverlay {
+    position: absolute;
+    width:100%;
+    height:100%;
+    top: 0px;
+    left: 0px;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background-color: rgba(152, 179, 211, .35);
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    cursor: pointer;
+    background-color: rgba(152, 179, 211, .35);
+    border-radius: 1.3px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    border: 1px solid rgba(8, 6, 6, 0.28);
+    height: 14px;
+    width: 6px;
+    background: rgb(255, 255, 255);
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -4px
+}
+
+#outerring {
+    width: 25px;
+    position: absolute;
+    animation: rotation 2.5s infinite linear;
+}
+
+#innerring {
+    width: 25px;
+    position: absolute;
+    animation: counterrotation 2.5s infinite linear;
+}
+
+#startingText {
+	margin-left: 32px;
+	font-size: 20px;
+}
+
+#gameStarting {
+	margin: 2px 0px 0px 3px;
+	display: none;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+@keyframes counterrotation {
+  from {
+    transform: rotate(359deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.headerText {
+	font-weight: normal;
+}
+
+.disconnected {
+	opacity: 0.5;
+}
+
+.hidden {
+	opacity: 0;
+}
+
+.hiddenRow {
+	opacity: 0;
+	animation: row_appear 0.25s forwards;
+}
+
+.hiddenDisconnectedRow {
+	opacity: 0;
+	animation: disconnected_row_appear 0.25s forwards;
+}
+
+@keyframes row_appear {
+	0% {opacity: 0;}
+	100% {opacity: 1;}
+}
+
+@keyframes disconnected_row_appear {
+	0% {opacity: 0;}
+	100% {opacity: 0.5;}
+}
+
+img:not([src]) {
+   visibility: hidden;
+}

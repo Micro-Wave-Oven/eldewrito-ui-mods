@@ -1,0 +1,461 @@
+@font-face{font-family:"Conduit ITC";src:url(dew://lib/Conduit-ITC.woff);}
+
+html {
+	color: #DCDADB;
+	font-family: "Conduit ITC", sans-serif;
+	overflow: hidden;
+}
+
+.third_placeImg {
+	height: 108px;
+	margin-left: -19.2px;
+	margin-top: -18px;
+	position: absolute;
+}
+
+.second_placeImg {
+	height: 108px;
+	margin-left: 19.2px;
+	margin-top: -18px;
+	position: absolute;
+}	
+
+.first_placeImg {
+	opacity: 0;
+	position: absolute;
+	height: 115.2px;
+	margin-left: -10.24px;
+	margin-top: -7.2px;
+	animation: first 0.1s forwards;
+	animation-delay: 2.1s;
+}
+
+.first_placeglow {
+	opacity: 0;
+	position: absolute;
+	height: 151.2px;
+	margin-left: -32.64px;
+	margin-top: -18px;
+	animation-name: glow;
+	animation-duration: 3s;
+	animation-iteration-count: infinite;
+	animation-timing-function: ease-in-out;
+	animation-delay: 2s;
+}
+
+.first_placeflare {
+	position: absolute;
+	height: 252px;
+	width: 908.8px;
+	margin-left: -374.72px;
+	margin-top: -72px;
+}
+
+@keyframes glow {
+	0% {opacity: 0;}
+	30%{opacity:1;}
+	70%{opacity:1;}
+	100%{opacity:0;}
+}
+
+@keyframes first {
+	0%	{opacity:0;}
+	100%{opacity:1;}
+}
+
+#player3 {
+	display:none;
+	position: fixed;
+	transform: translate(-50%, -50%);
+	width: 332.8px;
+	height: 100.8px;
+	margin: 0px auto;
+	bottom: 16.56px;
+}
+
+.player3In {
+	left: 40%;
+	opacity: 0; 
+	animation: slide_third_in 1.5s forwards;
+}
+
+@keyframes slide_third_in {
+	0% { opacity: 0; }
+	100% { 
+		left: 25%; 
+		opacity: 1; 
+	}
+}
+
+.player3Out {
+	left: 25%;
+	opacity: 1; 
+	animation: slide_third_out 1.5s forwards;
+}
+
+@keyframes slide_third_out {
+	0% { opacity: 1; }
+	100% { 
+		left: 40%;
+		opacity: 0; 
+	}
+}
+
+#third_background {
+	width: 100%;
+	height: 147%;
+	position: absolute;
+}
+
+#third_place {
+	width: 100%;
+	height: 100%;
+}
+
+#third_emblem {
+	position: absolute;
+	margin-left: 102.4px;
+	margin-top: 14.4px;
+	width: 102.4px;
+}
+
+#player3_name {
+	position: fixed;
+	font-size: 19.2px;
+	right: 57.6px;
+	top: 2px;
+}
+
+#player3_score {
+	position: fixed;
+	font-size: 25.6px;
+	bottom: 3.6px;
+	right: 57.6px;
+	color: #62CDFD;
+}
+
+#player2 {
+	display:none;
+	position: fixed;
+	transform: translate(-50%, -50%);
+	width: 332.8px;
+	height: 100.8px;
+	margin: 0 auto;
+	bottom: 16.56px;
+}
+
+.player2In {
+	left: 60%;
+	opacity: 0; 
+	animation: slide_second_in 1.5s forwards;
+}
+
+@keyframes slide_second_in {
+	0% { opacity: 0; }
+	100% { 
+		left: 75%; 
+		opacity: 1; 
+	}
+}
+
+.player2Out {
+	left: 75%; 
+	opacity: 1; 
+	animation: slide_second_out 1.5s forwards;
+}
+
+@keyframes slide_second_out {
+	0% { opacity: 1; }
+	100% { 
+		left: 60%;
+		opacity: 0; 
+	}
+}
+
+#second_background {
+	width: 100%;
+	height: 147%;
+	position: absolute;
+}
+
+#second_place {
+	width: 100%;
+	height: 100%;
+}
+
+#second_emblem {
+	position: absolute;
+	margin-left: 140.8px;
+	margin-top: 14.4px;
+	width: 102.4px;
+}
+
+#player2_name {
+	position: fixed;
+	font-size: 19.2px;
+	right: 19.2px;
+	top: 2px;
+}
+
+#player2_score {
+	position: fixed;
+	font-size: 25.6px;
+	bottom: 3.6px;
+	right: 23.04px;
+	color: #62CDFD;
+}
+
+#player1 {
+	display:none;
+	position: fixed;
+	transform: translate(-50%, -50%);
+
+	left: 50%;
+	margin: 0 auto;
+	bottom: 4.176px;
+
+}
+
+.player1In {
+	width: 409.6px;
+	height: 144px;
+	opacity: 0;
+	animation: slide_first_in 1s forwards;
+}
+
+@keyframes slide_first_in {
+	0% { opacity: 0; }
+	100% { 
+		width: 384px;
+		height: 129.6px;
+		opacity: 1; 
+	}
+}
+
+.player1Out {
+	width: 384px;
+	height: 129.6px;
+	opacity: 1; 
+	animation: slide_first_out 1s forwards;
+}
+
+@keyframes slide_first_out {
+	0% { opacity: 1; }
+	100% { 
+		width: 358.4px;
+		height: 115.2px;
+		opacity: 0; 
+	}
+}
+
+#first_background {
+	width: 100%;
+	height: 131%;
+	position: absolute;
+}
+
+#first_place {
+	width: 100%;
+	height: 100%;
+}
+
+#first_emblem {
+	position: absolute;
+	margin-left: -51.2px;
+	left: 50%;
+	width: 102.4px;
+	top: 14.5%;
+}
+
+#player1_name {
+	opacity: 0;
+	position: fixed;
+	font-size: 21.76px;
+	right: 128px;
+	top: 2.88px;
+	animation: text_slide_first 0.15s forwards;
+	animation-delay: 1.6s;
+}
+
+#player1_score {
+	opacity: 0;
+	position: fixed;
+	font-size: 44.8px;
+	bottom: 3.6px;
+	right: 128px;
+	color: #72d3ff;
+	animation: text_slide_first 0.15s forwards;
+	animation-delay: 1.6s;
+	text-shadow: 6px 7px 11px black;
+}
+
+#player1_scoreslide {
+	opacity: 0;
+	position: fixed;
+	font-size: 44.8px;
+	bottom: 3.6px;
+	right: 128px;
+	color: #72d3ff;
+	width: 192px;
+	margin-right: -28.8px;
+	animation: text_slide_score 0.80s forwards;
+	animation-delay: 1.6s;
+}
+
+@keyframes text_slide_first {
+	0% { 
+		opacity: 0;
+	}
+	100% { 
+		right: 23.04px;
+		opacity: 1; 
+	}
+}
+
+@keyframes text_slide_score {
+	0% { 
+		opacity: 0;
+	}
+	15% { 
+		right: 23.04px;
+		opacity: 0.9;
+	}
+	100% { 
+		right: 23.04px;
+		opacity: 0;
+	}
+}
+
+.stat_background {
+	width: 100%;
+	height: 100%;
+	position:absolute;
+}
+
+.statsContainer {
+	display: none;
+	width: 275px;
+	height: 70px;
+	right: 23px;
+	position: fixed;
+	background-position: center;
+}
+
+#kills {
+	top: 58px;
+}
+
+#assists {
+	top: 129px;
+}
+
+#deaths {
+	top: 200px;
+}
+
+#streak {
+	top: 271px;
+}
+
+.statName {
+	margin-top: 23px;
+	color: #aaefff;
+	font-size: 19.5px;
+	float: right;
+	right: 93.5px;
+	position: relative;
+	text-transform: uppercase;
+	opacity: 0.65;
+	letter-spacing: 1.8px;
+}
+
+.stats {
+	color: #ffffff;
+	margin-top: 23px;
+	font-size: 19.5px;
+	right: 6px;
+	float: right;
+	position: absolute;
+	text-align: center;
+	width: 64px;
+}
+
+@keyframes statsDisplay {
+	0% {
+		opacity: 0;
+		filter: brightness(10);
+		}
+	100% {
+		opacity: 1;
+		filter: brightness(1);
+	}
+}
+
+.killFadeIn {
+	animation: statsDisplay 0.40s forwards;
+	animation-delay: 0s;
+	filter: brightness(10);
+	opacity: 0;
+}
+
+.assistFadeIn {
+	animation: statsDisplay 0.40s forwards;
+	animation-delay: 0.15s;
+	filter: brightness(10);
+	opacity: 0;
+}
+
+.deathFadeIn {
+	animation: statsDisplay 0.40s forwards;
+	animation-delay: 0.25s;
+	filter: brightness(10);
+	opacity: 0;
+}
+
+.streakFadeIn {
+	animation: statsDisplay 0.40s forwards;
+	animation-delay: 0.35s;
+	filter: brightness(10);
+	opacity: 0;
+}
+
+
+
+.killFadeOut {
+	animation: statsFadeOut 0.40s forwards;
+	animation-delay: 0s;
+	filter: none;
+	opacity: 1;
+}
+
+.assistFadeOut {
+	animation: statsFadeOut 0.40s forwards;
+	animation-delay: 0.15s;
+	filter: none;
+	opacity: 1;
+}
+
+.deathFadeOut {
+	animation: statsFadeOut 0.40s forwards;
+	animation-delay: 0.25s;
+	filter: none;
+	opacity: 1;
+}
+
+.streakFadeOut {
+	animation: statsFadeOut 0.40s forwards;
+	animation-delay: 0.35s;
+	filter: none;
+	opacity: 1;
+}
+
+@keyframes statsFadeOut {
+	0% {
+		opacity: 1;
+		right: 23.04px;
+		}
+	100% {
+		opacity: 0;
+		right: 0;
+	}
+}
