@@ -25,7 +25,9 @@ dew.on("clear-local-emblem", function (ev) {
     });
 });
 
-refresh_local_emblem();
+dew.on("clear-player-emblem", function(ev) {
+    delete custom_emblem_cache[ev.data.uid.split("|")[1]];    
+});
 
 dew.on("emblem-data", function (ev) {
     let uid = ev.data.uid.split("|")[1];
@@ -46,6 +48,10 @@ dew.on("hide-player-custom-emblem", function (ev) {
         custom_emblem_cache[uid].hidden = !custom_emblem_cache[uid].hidden;
     }
 });
+
+
+refresh_local_emblem();
+
 
 
 dew.on("podium", function(e){

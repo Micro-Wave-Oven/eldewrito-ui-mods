@@ -244,11 +244,14 @@ dew.on("clear-local-emblem", function (ev) {
     });
 });
 
-refresh_local_emblem();
+dew.on("clear-player-emblem", function(ev) {
+    delete custom_emblem_cache[ev.data.uid.split("|")[1]];
+});
 
 dew.on("emblem-data", function (ev) {
-    console.log("[scoreboard.js] emblem-data");
-    console.log(ev.data);
+    //console.log("[scoreboard.js] emblem-data");
+    //console.log(ev.data);
+    
     let uid = ev.data.uid.split("|")[1];
     
     if (uid in custom_emblem_cache) {
@@ -262,6 +265,7 @@ dew.on("emblem-data", function (ev) {
 });
 
 
+refresh_local_emblem();
 
 
 // ----------- vue components
@@ -988,9 +992,7 @@ function handleUpdate(update, animate = false) {
                 ...scores,
                 type: 0,
                 id: `d${playerId}`,
-                // Custom Emblem Modifications
-                //emblem: (playersInfo && playersInfo.e) ? playersInfo.e : player.emblem,
-                emblem: (custom_emblem_cache[player.uid] && !custom_emblem_cache[player.uid].hidden) ? custom_emblem_cache[player.uid].image : ((playersInfo && playersInfo.e) ? playersInfo.e : player.emblem),
+                emblem: (playersInfo && playersInfo.e) ? playersInfo.e : player.emblem,
                 rank: playersInfo !== undefined ? (playersInfo.r !== undefined ? playersInfo.r : -1) : -1,
                 isDead: false,
                 hasObjective: false,
